@@ -492,6 +492,8 @@
       .section-scores { width: 100%; justify-content: space-between; }
     }
   </style>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="theme.css" />
 </head>
 <body>
 
@@ -540,7 +542,7 @@
     <div class="top-bar-left">
       <div class="top-bar-logo">SAT Practice</div>
       <div class="top-bar-sep">|</div>
-      <div class="top-bar-module" id="eng-bar-module">English · Module</div>
+      <div class="top-bar-module" id="eng-bar-module">Writing · Module</div>
     </div>
     <div class="top-bar-center">
       <div class="timer" id="eng-timer">32:00</div>
@@ -1031,7 +1033,7 @@ function loadSection(key) {
   if (key === 'eng1' || key === 'eng2') {
     document.getElementById('english-ui').style.display = 'block';
     initHighlights(sectionData[key].questions.length, key);
-    document.getElementById('eng-bar-module').textContent = `English · ${fullTestLabel} · ${sectionData[key].label.split('· ')[1]}`;
+    document.getElementById('eng-bar-module').textContent = `Writing · ${fullTestLabel} · ${sectionData[key].label.split('· ')[1]}`;
     buildNavEng(key);
     renderQuestionEng(key, 0);
     startTimerEng(key);

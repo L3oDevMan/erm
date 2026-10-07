@@ -150,8 +150,28 @@
       .breadcrumb { display:none; }
     }
   </style>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="theme.css" />
+  <link rel="stylesheet" href="home.css" />
 </head>
 <body>
+
+<aside class="sidebar" aria-label="Main navigation">
+  <div class="sb-brand" onclick="show('home')"><i>S</i>SATLab</div>
+  <nav class="sb-nav">
+    <button class="sb-link active" data-nav="home" onclick="show('home')"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Home</button>
+    <div class="sb-label">Practice</div>
+    <button class="sb-link" data-nav="math" onclick="show('math')"><svg viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></svg>Math</button>
+    <button class="sb-link" data-nav="english" onclick="show('english')"><svg viewBox="0 0 24 24"><path d="M4 5h16M4 12h10M4 19h16"/></svg>Writing</button>
+    <button class="sb-link" data-nav="fulltests" onclick="show('fulltests')"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 8h8M8 12h8M8 16h4"/></svg>Full Test</button>
+    <button class="sb-link" data-nav="drills" onclick="show('drills')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>Topical Drills</button>
+    <div class="sb-label">You</div>
+    <button class="sb-link" onclick="window.location.href='weakness.html'"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Weakness Profile</button>
+    <button class="sb-link" onclick="window.location.href='previous-scores.html'"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Previous Scores</button>
+    <button class="sb-link" onclick="window.location.href='settings.html'"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg>Settings</button>
+  </nav>
+  <div class="sb-foot">Digital SAT · 2025–2026<br>Not affiliated with College Board</div>
+</aside>
 
 <!-- HOME -->
 <div id="home" class="page active">
@@ -168,22 +188,33 @@
     </div>
   </header>
   <div class="home-hero">
-    <div class="hero-label">College Board · Official Practice</div>
-    <h1 class="hero-title">Practice tests,<br>section by section.</h1>
-    <p class="hero-sub">Work through real SAT practice questions organized by subject. Select Math or English to begin.</p>
-    <div class="countdown-widget" id="countdown-widget">
-      <div class="countdown-label">Time 'til SAT <strong id="cd-month">—</strong> test</div>
-      <div class="countdown-nums">
-        <div class="countdown-unit"><div class="val" id="cd-days">--</div><div class="lbl">Days</div></div>
-        <div class="countdown-unit"><div class="val" id="cd-hours">--</div><div class="lbl">Hours</div></div>
-        <div class="countdown-unit"><div class="val" id="cd-mins">--</div><div class="lbl">Min</div></div>
-        <div class="countdown-unit"><div class="val" id="cd-secs">--</div><div class="lbl">Sec</div></div>
+    <div class="hero-card">
+      <div class="hero-copy">
+        <div class="hero-label">College Board · Official Practice</div>
+        <h1 class="hero-title">Practice with real test,<br><mark>maximize your SAT score</mark></h1>
+        <p class="hero-sub">Work through official SAT questions by subject, skill, or full-length simulation — scored out of 1600.</p>
+        <div class="hero-cta">
+          <button class="btn-primary hero-btn" onclick="show('fulltests')">Start a full test →</button>
+          <button class="hero-btn ghost" onclick="show('drills')">Drill a skill</button>
+        </div>
+        <div class="hero-pills">
+          <span>28 practice tests</span><span>2,724 questions</span><span>10 skill drills</span>
+        </div>
+      </div>
+      <div class="countdown-widget" id="countdown-widget">
+        <div class="countdown-label">Time 'til SAT <strong id="cd-month">—</strong> test</div>
+        <div class="countdown-nums">
+          <div class="countdown-unit"><div class="val" id="cd-days">--</div><div class="lbl">Days</div></div>
+          <div class="countdown-unit"><div class="val" id="cd-hours">--</div><div class="lbl">Hours</div></div>
+          <div class="countdown-unit"><div class="val" id="cd-mins">--</div><div class="lbl">Min</div></div>
+          <div class="countdown-unit"><div class="val" id="cd-secs">--</div><div class="lbl">Sec</div></div>
+        </div>
       </div>
     </div>
   </div>
-  <hr class="divider" />
+  <div class="section-head"><h2>What do you want to practice?</h2><p>Four ways in — pick one and go.</p></div>
   <div class="subject-row">
-    <div class="subject-card" onclick="show('math')">
+    <div class="subject-card c-math" onclick="show('math')">
       <div class="card-top"><div class="card-tag">Section 1 &amp; 2</div><div class="card-arrow">↗</div></div>
       <div class="card-title">Math</div>
       <div class="card-desc">Algebra, advanced math, problem-solving, data analysis, geometry, and trigonometry.</div>
@@ -196,9 +227,9 @@
         </div>
       </div>
     </div>
-    <div class="subject-card" onclick="show('english')">
+    <div class="subject-card c-eng" onclick="show('english')">
       <div class="card-top"><div class="card-tag">Section 1 &amp; 2</div><div class="card-arrow">↗</div></div>
-      <div class="card-title">English</div>
+      <div class="card-title">Writing</div>
       <div class="card-desc">Reading comprehension, grammar, standard English conventions, and rhetoric.</div>
       <div class="card-tests">
         <div class="card-tests-lbl">Practice tests</div>
@@ -209,7 +240,7 @@
         </div>
       </div>
     </div>
-    <div class="subject-card" onclick="show('fulltests')">
+    <div class="subject-card c-full" onclick="show('fulltests')">
       <div class="card-top"><div class="card-tag">All Sections</div><div class="card-arrow">↗</div></div>
       <div class="card-title">Full Test</div>
       <div class="card-desc">Complete Digital SAT simulation: Reading &amp; Writing + Math, scored out of 1600.</div>
@@ -222,7 +253,7 @@
         </div>
       </div>
     </div>
-    <div class="subject-card" onclick="show('drills')">
+    <div class="subject-card c-drill" onclick="show('drills')">
       <div class="card-top"><div class="card-tag">By Skill</div><div class="card-arrow">↗</div></div>
       <div class="card-title">Topical Drills</div>
       <div class="card-desc">Targeted Reading &amp; Writing practice, organized by individual skill — work each one until it's solid.</div>
@@ -236,7 +267,6 @@
       </div>
     </div>
   </div>
-  <hr class="divider" />
   <div class="home-stats">
     <div class="stat-item"><div class="stat-num">28</div><div class="stat-lbl">Practice Tests</div></div>
     <div class="stat-item"><div class="stat-num">10</div><div class="stat-lbl">Skill Drills</div></div>
@@ -293,13 +323,13 @@
   <header class="site-header">
     <div class="logo" onclick="show('home')">SATLab</div>
     <div class="hdr-right">
-      <div class="breadcrumb"><span class="crumb" onclick="show('home')">Home</span><span class="sep">/</span><span class="cur">English</span></div>
+      <div class="breadcrumb"><span class="crumb" onclick="show('home')">Home</span><span class="sep">/</span><span class="cur">Writing</span></div>
       <button class="back-btn" onclick="show('home')">← Back</button>
     </div>
   </header>
   <div class="subj-hero">
     <div class="subj-label">SAT · Reading and Writing</div>
-    <div class="subj-title">English</div>
+    <div class="subj-title">Writing</div>
     <div class="subj-meta">Module 1 &amp; 2 · Information &amp; Ideas, Craft &amp; Structure, Expression of Ideas, Standard English · 27 questions · 32 min per module</div>
   </div>
   <div class="tests-section">
@@ -409,7 +439,7 @@
   let curSubj = 'math', curTestId = 'mathtest01', curLabel = 'Practice Test 1';
   const cfg = {
     math:    { label:'SAT · Mathematics',         title:'Math',    q:22, min:35, file:'math.html',  chips:['Algebra','Advanced Math','PS & Data Analysis','Geometry & Trig'] },
-    english: { label:'SAT · Reading and Writing',  title:'English', q:27, min:32, file:'test.html', chips:['Info & Ideas','Craft & Structure','Expression of Ideas','Standard English'] },
+    english: { label:'SAT · Reading and Writing',  title:'Writing', q:27, min:32, file:'test.html', chips:['Info & Ideas','Craft & Structure','Expression of Ideas','Standard English'] },
   };
 
   // Build math list (15 tests)
@@ -445,6 +475,8 @@
   function show(id) {
     document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
     document.getElementById(id).classList.add('active');
+    const navId = ({modules:curSubj, drillmods:'drills'})[id] || id;
+    document.querySelectorAll('.sb-link[data-nav]').forEach(b => b.classList.toggle('active', b.dataset.nav === navId));
     window.scrollTo(0,0);
   }
   function backToSubj() { show(curSubj); }
@@ -574,6 +606,7 @@
   }
   updateCountdown();
   setInterval(updateCountdown, 1000);
+  { const h = location.hash.slice(1); if (['math','english','fulltests','drills'].includes(h)) show(h); }
 </script>
 
 <div class="reco-popup" id="reco-popup">
