@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <script>(function(){try{var t=localStorage.getItem('sat-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TESTER — Sample Math Module</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    :root { --black:#0b1f44; --gray-dark:#344054; --gray-mid:#667085; --gray-light:#b4bccb; --gray-border:#e3e8f0; --gray-bg:#edf1f7; --white:#f2f6fc; --correct:#1f8a4c; --incorrect:#d1493b; }
+    :root[data-theme="dark"] { --black:#eef2f8; --gray-dark:#cbd3e1; --gray-mid:#8f9bb0; --gray-light:#4b566b; --gray-border:#1f2f52; --gray-bg:#0f1a33; --white:#08122a; }
+    html, body { min-height:100%; font-family:'Plus Jakarta Sans',sans-serif; background:var(--white); color:var(--black); font-size:15px; -webkit-font-smoothing:antialiased; }
+
+    .top-bar { position:sticky; top:0; z-index:200; display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:0 1.5rem; height:60px; border-bottom:1px solid var(--gray-border); }
+    .top-bar-left { display:flex; align-items:center; gap:.9rem; min-width:0; }
+    .top-bar-logo { font-weight:800; font-size:16px; }
+    .tester-badge { font-family:'DM Mono',monospace; font-size:11px; letter-spacing:.12em; padding:4px 10px; border-radius:999px; background:#e5383b; color:#fff; }
+    .top-bar-module { font-family:'DM Mono',monospace; font-size:12px; color:var(--gray-mid); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .top-bar-right { display:flex; align-items:center; gap:.6rem; flex-shrink:0; }
+    .btn { font:500 13px 'Plus Jakarta Sans',sans-serif; border:1px solid var(--gray-border); background:var(--card); color:var(--gray-dark); border-radius:999px; padding:7px 16px; cursor:pointer; transition:all .15s; }
+    .btn:hover { border-color:#1c5fd4; color:#1c5fd4; }
+    .btn.primary { background:linear-gradient(135deg,#2f7bf0,#123f94); color:#fff; border-color:transparent; font-weight:600; }
+
+    .banner { max-width:760px; margin:1.25rem auto 0; padding:10px 16px; border-radius:14px; background:rgba(229,56,59,.08); color:#c1272d; font-size:13px; }
+    .wrap { max-width:760px; margin:1rem auto 7rem; padding:0 1.25rem; }
+    .q-card { background:var(--card,#fff); border:1px solid var(--gray-border); border-radius:22px; padding:1.75rem; box-shadow:0 4px 18px rgba(16,40,90,.07); }
+    .q-meta { font-family:'DM Mono',monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:#1c5fd4; margin-bottom:.9rem; display:flex; gap:10px; flex-wrap:wrap; }
+    .q-meta span { background:rgba(28,95,212,.1); padding:3px 10px; border-radius:999px; }
+    .q-text { font-size:18px; font-weight:600; line-height:1.55; margin-bottom:1.5rem; }
+    .choices { display:flex; flex-direction:column; gap:.65rem; }
+    .choice { display:flex; align-items:center; gap:.9rem; padding:.9rem 1.1rem; border:1px solid var(--gray-border); border-radius:14px; cursor:pointer; background:var(--card,#fff); transition:all .15s; }
+    .choice:hover { border-color:#6f9cf0; }
+    .choice .l { display:grid; place-items:center; width:28px; height:28px; border-radius:50%; background:var(--gray-bg); font:500 12px 'DM Mono',monospace; flex-shrink:0; }
+    .choice.sel { border-color:#1c5fd4; background:rgba(28,95,212,.09); box-shadow:0 0 0 3px rgba(28,95,212,.1); }
+    .choice.sel .l { background:#1c5fd4; color:#fff; }
+    .choice.ok { border-color:var(--correct); background:rgba(31,138,76,.1); } .choice.ok .l { background:var(--correct); color:#fff; }
+    .choice.bad { border-color:var(--incorrect); background:rgba(209,73,59,.1); } .choice.bad .l { background:var(--incorrect); color:#fff; }
+    .fr input { width:220px; padding:12px 14px; font:500 20px 'DM Mono',monospace; border:1px solid var(--gray-border); border-radius:14px; background:var(--card,#fff); color:inherit; }
+    .fr input:focus { outline:none; border-color:#1c5fd4; box-shadow:0 0 0 4px rgba(28,95,212,.12); }
+    .fr .hint { font-size:12px; color:var(--gray-mid); margin-top:.6rem; }
+    .result { margin-top:1.2rem; padding:12px 14px; border-radius:12px; font-size:14px; }
+    .result.ok { background:rgba(31,138,76,.1); color:var(--correct); } .result.bad { background:rgba(209,73,59,.1); color:var(--incorrect); }
+
+    .bottom-bar { position:fixed; bottom:0; left:0; right:0; height:64px; display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:0 1.5rem; border-top:1px solid var(--gray-border); background:color-mix(in srgb,var(--white) 90%,transparent); backdrop-filter:blur(12px); }
+    .dots { display:flex; gap:6px; overflow-x:auto; }
+    .dot { width:32px; height:32px; border-radius:10px; border:1px solid var(--gray-border); display:grid; place-items:center; font:500 12px 'DM Mono',monospace; color:var(--gray-mid); cursor:pointer; flex-shrink:0; background:var(--card,#fff); }
+    .dot.ans { background:rgba(28,95,212,.1); border-color:#6f9cf0; color:#154aa8; }
+    .dot.cur { background:#1c5fd4; border-color:transparent; color:#fff; }
+    .nav { display:flex; gap:.5rem; }
+
+    .ov { position:fixed; inset:0; z-index:500; display:none; align-items:center; justify-content:center; background:rgba(8,14,30,.55); padding:1rem; }
+    .ov.open { display:flex; }
+    .ov-box { width:100%; max-width:480px; max-height:85vh; overflow:auto; background:var(--card,#fff); border-radius:24px; padding:2rem; }
+    .ov-box h2 { font-size:22px; margin-bottom:.3rem; }
+    .big { font-size:56px; font-weight:800; margin:.5rem 0; }
+    .rep { border:1px solid var(--gray-border); border-radius:12px; padding:10px 12px; margin-top:.6rem; font-size:13px; }
+    .rep small { color:var(--gray-mid); font-family:'DM Mono',monospace; display:block; margin-bottom:3px; }
+    @media (max-width:560px) { .top-bar-module { display:none; } .q-text { font-size:16px; } }
+  </style>
+  <link rel="stylesheet" href="theme.css" />
+  <style>
+    /* keep this page's own look; theme.css only supplies shared tokens */
+    html, body { background:var(--white); }
+    body { background-image:none; }
+    .top-bar { background:var(--white); }
+  </style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="top-bar-left">
+    <div class="top-bar-logo">SATLab</div>
+    <span class="tester-badge">TESTER</span>
+    <div class="top-bar-module" id="mod">Sample Math Module · TESTER</div>
+  </div>
+  <div class="top-bar-right">
+    <button class="btn" onclick="showReports()">Saved reports</button>
+    <button class="btn" onclick="location.href='index.html'">Exit</button>
+    <button class="btn primary" onclick="submitTest()">Submit</button>
+  </div>
+</div>
+
+<div class="banner"><b>TESTER module</b> — a tiny sample test so you can try the <b>Report</b> button (top right). Not part of the real practice tests.</div>
+
+<div class="wrap"><div class="q-card" id="card"></div></div>
+
+<div class="bottom-bar">
+  <div class="dots" id="dots"></div>
+  <div class="nav">
+    <button class="btn" onclick="go(-1)">← Back</button>
+    <button class="btn primary" onclick="go(1)">Next →</button>
+  </div>
+</div>
+
+<div class="ov" id="score-ov"><div class="ov-box">
+  <h2>TESTER complete</h2><div style="color:var(--gray-mid);font-size:13px">Sample Math Module</div>
+  <div class="big" id="score">–</div><div id="score-sub" style="color:var(--gray-mid);font-size:14px"></div>
+  <div style="display:flex;gap:.6rem;margin-top:1.5rem"><button class="btn" onclick="closeOv('score-ov')">Review answers</button><button class="btn primary" onclick="location.href='index.html'">Back home</button></div>
+</div></div>
+
+<div class="ov" id="rep-ov"><div class="ov-box">
+  <h2>Saved reports</h2><div style="color:var(--gray-mid);font-size:13px">Reports submitted on this device (test mode).</div>
+  <div id="rep-list"></div>
+  <div style="display:flex;gap:.6rem;margin-top:1.5rem"><button class="btn" onclick="clearReports()">Clear all</button><button class="btn primary" onclick="closeOv('rep-ov')">Close</button></div>
+</div></div>
+
+<script>
+  // Questions are intentionally simple; one has a deliberately odd wording so you have something to report.
+  const QS = [
+    { id:'TESTER-M1', domain:'Algebra', diff:'Easy', type:'mc', q:'If 3x + 7 = 28, what is the value of x?', c:['5','7','9','21'], a:1,
+      why:'3x = 21, so x = 7.' },
+    { id:'TESTER-M2', domain:'Advanced Math', diff:'Medium', type:'mc', q:'Which of the following is equivalent to (x + 3)(x − 3)?', c:['x² − 9','x² + 9','x² − 6x − 9','x² + 6x − 9'], a:0,
+      why:'Difference of squares: x² − 9.' },
+    { id:'TESTER-M3', domain:'Problem-Solving and Data Analysis', diff:'Easy', type:'mc', q:'A store sells pens at $2.50 each. How much do 12 pens cost?', c:['$24.00','$30.00','$32.50','$36.00'], a:1,
+      why:'12 × 2.50 = 30.' },
+    { id:'TESTER-M4', domain:'Geometry and Trigonometry', diff:'Medium', type:'mc', q:'A right triangle has legs of length 6 and 8. What is the length of its hypotenuse?', c:['10','12','14','48'], a:0,
+      why:'6² + 8² = 100, so the hypotenuse is 10.' },
+    { id:'TESTER-M5', domain:'Algebra', diff:'Medium', type:'fr', q:'The line y = 2x + b passes through the point (3, 11). What is the value of b?', ans:['5'],
+      why:'11 = 2(3) + b, so b = 5.' },
+    { id:'TESTER-M6', domain:'Advanced Math', diff:'Hard', type:'fr', q:'If x² − 5x + 6 = 0 and x > 2, what is the value of x?', ans:['3'],
+      why:'(x − 2)(x − 3) = 0 and x > 2, so x = 3. (This one has a deliberately confusing condition — try reporting it!)' }
+  ];
+  let cur = 0, submitted = false;
+  const answers = new Array(QS.length).fill(null);
+
+  function render() {
+    const q = QS[cur], L = ['A','B','C','D'];
+    let body = '<div class="q-meta"><span>Question ' + (cur+1) + ' of ' + QS.length + '</span><span>' + q.domain + '</span><span>' + q.diff + '</span></div>';
+    body += '<div class="q-text">' + q.q + '</div>';
+    if (q.type === 'mc') {
+      body += '<div class="choices">' + q.c.map((c,i) => {
+        let cls = 'choice';
+        if (submitted) { if (i === q.a) cls += ' ok'; else if (answers[cur] === i) cls += ' bad'; }
+        else if (answers[cur] === i) cls += ' sel';
+        return '<div class="' + cls + '" onclick="pick(' + i + ')"><div class="l">' + L[i] + '</div><div>' + c + '</div></div>';
+      }).join('') + '</div>';
+    } else {
+      body += '<div class="fr"><input id="fr" inputmode="decimal" placeholder="Your answer" value="' + (answers[cur] ?? '') + '" ' + (submitted ? 'disabled' : '') + ' oninput="frIn(this.value)" /><div class="hint">Student-produced response — type a number.</div></div>';
+    }
+    if (submitted) {
+      const ok = isCorrect(cur);
+      body += '<div class="result ' + (ok ? 'ok' : 'bad') + '"><b>' + (ok ? 'Correct' : 'Incorrect') + '.</b> ' + q.why + '</div>';
+    }
+    document.getElementById('card').innerHTML = body;
+    document.getElementById('mod').textContent = 'Sample Math Module · TESTER · Q' + (cur+1);
+    document.getElementById('dots').innerHTML = QS.map((_,i) => '<div class="dot' + (i===cur?' cur':(answers[i]!==null&&answers[i]!==''?' ans':'')) + '" onclick="cur=' + i + ';render()">' + (i+1) + '</div>').join('');
+  }
+  function pick(i) { if (submitted) return; answers[cur] = i; render(); }
+  function frIn(v) { answers[cur] = v.trim() === '' ? null : v.trim(); document.querySelectorAll('.dot')[cur].classList.toggle('ans', answers[cur] !== null && cur !== undefined); }
+  function go(d) { cur = Math.max(0, Math.min(QS.length-1, cur + d)); render(); }
+  function isCorrect(i) { const q = QS[i]; return q.type === 'mc' ? answers[i] === q.a : q.ans.includes(String(answers[i]||'').replace(/\s/g,'')); }
+  function submitTest() {
+    if (submitted) { openOv('score-ov'); return; }
+    if (!confirm('Submit the TESTER module?')) return;
+    submitted = true;
+    const n = QS.reduce((s,_,i) => s + (isCorrect(i) ? 1 : 0), 0);
+    document.getElementById('score').textContent = n + ' / ' + QS.length;
+    document.getElementById('score-sub').textContent = Math.round(n / QS.length * 100) + '% correct';
+    render(); openOv('score-ov');
+  }
+  function openOv(id) { document.getElementById(id).classList.add('open'); }
+  function closeOv(id) { document.getElementById(id).classList.remove('open'); }
+  function esc(s) { return String(s||'').replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+  function showReports() {
+    const all = (window.SATReport ? SATReport.getAll() : []).slice().reverse();
+    document.getElementById('rep-list').innerHTML = all.length ? all.map(r =>
+      '<div class="rep"><small>' + esc(r.module) + ' · Q' + esc(r.questionNumber) + ' · ' + esc(r.questionId) + ' · ' + new Date(r.createdAt).toLocaleString() + '</small>' + esc(r.message)  + '</div>'
+    ).join('') : '<div class="rep">No reports yet — click <b>Report</b> in the top bar.</div>';
+    openOv('rep-ov');
+  }
+  function clearReports() { if (window.SATReport) SATReport.clear(); showReports(); }
+  // Give the Report button the right question id (tester questions use their own ids)
+  window.SATReportContext = () => ({ questionNumber: cur + 1, questionId: QS[cur].id, module: 'TESTER · Sample Math Module' });
+  render();
+</script>
+<script src="report.js"></script>
+</body>
+</html>
