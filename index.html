@@ -165,6 +165,7 @@
     <button class="sb-link" data-nav="english" onclick="show('english')"><svg viewBox="0 0 24 24"><path d="M4 5h16M4 12h10M4 19h16"/></svg>Writing</button>
     <button class="sb-link" data-nav="fulltests" onclick="show('fulltests')"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 8h8M8 12h8M8 16h4"/></svg>Full Test</button>
     <button class="sb-link" data-nav="drills" onclick="show('drills')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>Topical Drills</button>
+    <button class="sb-link" onclick="window.location.href='hard.html'"><svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg>Hard Question Bank</button>
     <div class="sb-label">You</div>
     <button class="sb-link" onclick="window.location.href='weakness.html'"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Weakness Profile</button>
     <button class="sb-link" onclick="window.location.href='previous-scores.html'"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Previous Scores</button>
@@ -263,6 +264,18 @@
           <div class="card-test-item">10 skills · 94 modules</div>
           <div class="card-test-item">~15 questions per module</div>
           <div class="card-test-item">Every official R&amp;W question, sorted by skill</div>
+        </div>
+      </div>
+    </div>
+    <div class="subject-card c-hard" onclick="window.location.href='hard.html'">
+      <div class="card-top"><div class="card-tag">Math + Reading &amp; Writing</div><div class="card-arrow">↗</div></div>
+      <div class="card-title">Hard Question Bank</div>
+      <div class="card-desc">Every question tagged Hard across all practice tests, in sets of 20 — the questions that decide a top score.</div>
+      <div class="card-tests">
+        <div class="card-tests-lbl">Format</div>
+        <div class="card-test-list">
+          <div class="card-test-item">Hard-only sets for both sections</div>
+          <div class="card-test-item">Same test screen, timer and tools as the real practice tests</div>
         </div>
       </div>
     </div>
@@ -451,6 +464,13 @@
       <div class="test-right"><div class="badge badge-avail">Available</div><div class="test-arrow">→</div></div>
     </div>`;
   }).join('');
+
+  // TESTER entry: tiny sample module for trying the Report button (not a real test)
+  document.getElementById('math-list').insertAdjacentHTML('afterbegin', `<div class="test-row" onclick="window.location.href='tester.html'">
+      <div class="test-idx">—</div>
+      <div class="test-info"><div class="test-name">TESTER · Sample Math Module</div><div class="test-detail">6 quick questions for trying the “Report question issue” button · not a real test</div></div>
+      <div class="test-right"><div class="badge" style="border-color:#e5383b;background:#e5383b;color:#fff">TESTER</div><div class="test-arrow">→</div></div>
+    </div>`);
 
   // Build english list (13 tests)
   document.getElementById('eng-list').innerHTML = Array.from({length:13},(_,i)=>{

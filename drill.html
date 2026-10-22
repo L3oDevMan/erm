@@ -1246,10 +1246,15 @@ function attachPassageListener(qi) {
 }
 
 // ── Exit ──────────────────────────────────────────────────────
+// Two clicks instead of a popup (native confirm dialogs are blocked in some browsers):
+// the first click arms the button, a second click within 3 seconds leaves.
 function confirmExit() {
-  if (confirm('Exit this module? Your progress will not be saved.')) {
-    window.location.href = 'index.html';
+  const btn = document.querySelector('[onclick^="confirmExit"]');
+  if (!btn || btn.dataset.armed !== '1') {
+    if (btn) { btn.dataset.armed = '1'; btn.textContent = 'Click again to exit'; setTimeout(() => { btn.dataset.armed = ''; btn.textContent = 'Exit'; }, 3000); }
+    return;
   }
+  window.location.href = 'index.html';
 }
 
 // ── Draggable Divider ─────────────────────────────────────────
@@ -1328,5 +1333,6 @@ function confirmExit() {
 })();
 </script>
 <script src="auth.js"></script>
+<script src="report.js"></script>
 </body>
 </html>

@@ -321,11 +321,15 @@
 <script src="https://www.desmos.com/api/v1.10/calculator.js?apiKey=dcb31709b452b1cf9dc26972add0fda6"></script>
 <script src="math_modules.js"></script>
 <script src="math_images.js"></script>
+<script src="hardbank.js"></script>
 <script>
 const P = new URLSearchParams(location.search);
 const testId    = P.get('test')   || 'mathtest01';
 const testLabel = P.get('label')  || 'Practice Test 1';
 const modId     = P.get('module') || '1A';
+// Hard Question Bank sets (test=hard) are built from every Hard question in math_modules.js.
+const HARD_MODE = testId === 'hard';
+const modWord   = HARD_MODE ? 'Set' : 'Module';
 const modKey    = `${testId}_${modId}`;
 
 let QS = [], answers = [], flagged = [], frInputs = [];
@@ -338,7 +342,7 @@ window.addEventListener('load', () => {
     document.getElementById('load-lbl').textContent = 'Error: math_modules.js or math_images.js missing.';
     return;
   }
-  QS = MATH_MODULES[modKey];
+  QS = (HARD_MODE && window.HardBank) ? HardBank.mathSet(parseInt(modId, 10), P.get('skill') || '') : MATH_MODULES[modKey];
   if (!QS || !QS.length) {
     document.getElementById('load-lbl').textContent = `No questions for: ${modKey}`;
     return;
@@ -356,8 +360,8 @@ window.addEventListener('load', () => {
   answers   = new Array(QS.length).fill(null);
   flagged   = new Array(QS.length).fill(false);
   frInputs  = new Array(QS.length).fill('');
-  document.getElementById('tb-module').textContent  = `Math · ${testLabel} · Module ${modId}`;
-  document.getElementById('score-sub').textContent  = `${testLabel} · Module ${modId}`;
+  document.getElementById('tb-module').textContent  = `Math · ${testLabel} · ${modWord} ${modId}`;
+  document.getElementById('score-sub').textContent  = `${testLabel} · ${modWord} ${modId}`;
   document.getElementById('loading').classList.add('gone');
   buildNav(); renderQ(0); startTimer();
 });
@@ -482,7 +486,8 @@ function renderQ(i) {
       } else {
         if (answers[i]===li) cls+=' sel';
       }
-      return `<button class="${cls}" onclick="selMC(${i},${li})">${l}</button>`;
+      const label = q.question && q.choices ? `${l}.&nbsp; ${escH(q.choices[li])}` : l;
+      return `<button class="${cls}" style="${q.question ? 'width:auto;padding:0 14px;text-align:left' : ''}" onclick="selMC(${i},${li})">${label}</button>`;
     }).join('');
 
     let hint = '';
@@ -527,7 +532,7 @@ function renderQ(i) {
       ${q.is_mc?'':`<span style="font-size:10px;color:var(--gray-mid);border:1px solid var(--gray-border);border-radius:2px;padding:2px 7px;font-family:'DM Mono',monospace">Free Response</span>`}
     </div>
     <div class="q-num">Question ${i+1} of ${QS.length}</div>
-    ${imgSrc?`<div class="q-img-wrap"><img src="${imgSrc}" alt="Q${i+1}" onerror="this.parentElement.innerHTML='<div style=&quot;padding:1rem;color:var(--incorrect);font-size:13px&quot;>Image failed to load for page ${q.page} (question ${q.id}). Check that math_images.js has a key &quot;${q.page}&quot;.</div>'"/></div>`
+    ${q.question ? `<div class="q-text-block" style="font-size:16px;line-height:1.6;padding:1rem 1.25rem;border:1px solid var(--gray-border);border-radius:4px;background:var(--white)">${escH(q.question)}</div>` : imgSrc?`<div class="q-img-wrap"><img src="${imgSrc}" alt="Q${i+1}" onerror="this.parentElement.innerHTML='<div style=&quot;padding:1rem;color:var(--incorrect);font-size:13px&quot;>Image failed to load for page ${q.page} (question ${q.id}). Check that math_images.js has a key &quot;${q.page}&quot;.</div>'"/></div>`
             :`<div style="padding:1rem;color:var(--gray-mid);font-size:13px">No image found for page ${q.page} (question ${q.id}). Check that math_images.js has a key "${q.page}".</div>`}
     ${ansHtml}
     <label class="flag-row">
@@ -657,7 +662,7 @@ async function submitTest() {
 
   await saveScoreHistory({
     type: 'math', typeLabel: 'Math',
-    title: `${testLabel} · Module ${modId}`,
+    title: `${testLabel} · ${modWord} ${modId}`,
     correct, total, pct,
     stats: { correct, incorrect, unanswered },
     breakdownLabel: 'Domain', breakdown: domainData,
@@ -670,8 +675,18 @@ async function submitTest() {
 
 function openO(id)  { document.getElementById(id).classList.add('open'); }
 function closeO(id) { document.getElementById(id).classList.remove('open'); }
-function confirmExit() { if(confirm('Exit? Progress will not be saved.')) location.href='index.html'; }
+// Two clicks instead of a popup (native confirm dialogs are blocked in some browsers):
+// the first click arms the button, a second click within 3 seconds leaves.
+function confirmExit() {
+  const btn = document.querySelector('[onclick^="confirmExit"]');
+  if (!btn || btn.dataset.armed !== '1') {
+    if (btn) { btn.dataset.armed = '1'; btn.textContent = 'Click again to exit'; setTimeout(() => { btn.dataset.armed = ''; btn.textContent = 'Exit'; }, 3000); }
+    return;
+  }
+  location.href = 'index.html';
+}
 </script>
 <script src="auth.js"></script>
+<script src="report.js"></script>
 </body>
 </html>
