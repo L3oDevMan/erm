@@ -122,17 +122,24 @@
     setTimeout(close, 1400);
   }
 
-  function inject() {
-    build();
+  // Adds a Report button to every top bar that lacks one. Safe to call again
+  // after a page rewrites its top bar (fulltest.html review mode does).
+  function addButtons() {
     var bars = document.querySelectorAll('.top-bar-right, .tb-right');
     bars.forEach(function (bar) {
+      if (bar.querySelector('.rq-btn')) return;
       var b = document.createElement('button');
       b.type = 'button'; b.className = 'rq-btn'; b.innerHTML = ICON + 'Report';
       b.title = 'Report a problem with this question';
       b.addEventListener('click', function () { open(b); });
       bar.insertBefore(b, bar.firstChild);
     });
-    window.SATReport = { open: function () { open(document.querySelector('.rq-btn')); }, getAll: function () { try { return JSON.parse(localStorage.getItem(STORE_KEY) || '[]'); } catch (e) { return []; } }, clear: function () { try { localStorage.removeItem(STORE_KEY); } catch (e) {} } };
+  }
+
+  function inject() {
+    build();
+    addButtons();
+    window.SATReport = { refresh: addButtons, open: function () { open(document.querySelector('.rq-btn')); }, getAll: function () { try { return JSON.parse(localStorage.getItem(STORE_KEY) || '[]'); } catch (e) { return []; } }, clear: function () { try { localStorage.removeItem(STORE_KEY); } catch (e) {} } };
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', inject); else inject();
