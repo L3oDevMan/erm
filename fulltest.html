@@ -1081,6 +1081,7 @@ function reviewModule(key) {
     document.getElementById('eng-timer-pause-btn').style.display = 'none';
     buildNavEng(key);
     renderQuestionEng(key, 0);
+    if (window.SATReport) SATReport.refresh(); // the top bar was rewritten: put the Report button back
   } else {
     document.getElementById('english-ui').style.display = 'none';
     document.getElementById('math-ui').style.display = 'block';
@@ -1095,8 +1096,19 @@ function reviewModule(key) {
     document.getElementById('math-timer-pause-btn').style.display = 'none';
     buildNavMath(key);
     renderQuestionMath(key, 0);
+    if (window.SATReport) SATReport.refresh(); // the top bar was rewritten: put the Report button back
   }
 }
+
+// Tells report.js which question is on screen.
+window.SATReportContext = function () {
+  const engOn = document.getElementById('english-ui').style.display === 'block';
+  const mathOn = document.getElementById('math-ui').style.display === 'block';
+  if (!engOn && !mathOn) return {};
+  const sd = sectionData[getCurrentSectionKey()];
+  const q = sd && sd.questions[currentQ];
+  return q ? { questionNumber: currentQ + 1, questionId: q.id || '' } : {};
+};
 
 function backToReport() {
   reviewMode = false;
@@ -1817,7 +1829,8 @@ function renderQuestionMath(key, i) {
       } else {
         if (sd.answers[i]===li) cls+=' sel';
       }
-      return `<button class="${cls}" onclick="selMC('${key}',${i},${li})">${l}</button>`;
+      const label = q.question && q.choices ? `${l}.&nbsp; ${escHtml(q.choices[li])}` : l;
+      return `<button class="${cls}" style="${q.question ? 'width:auto;padding:0 14px;text-align:left' : ''}" onclick="selMC('${key}',${i},${li})">${label}</button>`;
     }).join('');
     let hint = '';
     if (submitted) {
@@ -1860,7 +1873,7 @@ function renderQuestionMath(key, i) {
       ${q.is_mc?'':`<span style="font-size:10px;color:var(--gray-mid);border:1px solid var(--gray-border);border-radius:2px;padding:2px 7px;font-family:'DM Mono',monospace">Free Response</span>`}
     </div>
     <div class="q-num">Question ${i+1} of ${sd.questions.length}</div>
-    ${imgSrc?`<div class="q-img-wrap"><img src="${imgSrc}" alt="Q${i+1}" onerror="this.parentElement.innerHTML='<div style=&quot;padding:1rem;color:var(--incorrect);font-size:13px&quot;>Image failed to load for page ${q.page} (question ${q.id}).</div>'"/></div>`
+    ${q.question ? `<div class="q-text-block" style="font-size:16px;line-height:1.6;padding:1rem 1.25rem;border:1px solid var(--gray-border);border-radius:4px;background:var(--white)">${escHtml(q.question)}</div>` : imgSrc?`<div class="q-img-wrap"><img src="${imgSrc}" alt="Q${i+1}" onerror="this.parentElement.innerHTML='<div style=&quot;padding:1rem;color:var(--incorrect);font-size:13px&quot;>Image failed to load for page ${q.page} (question ${q.id}).</div>'"/></div>`
             :`<div style="padding:1rem;color:var(--gray-mid);font-size:13px">No image found for page ${q.page} (question ${q.id}).</div>`}
     ${ansHtml}
     <label class="flag-row">
@@ -1883,30 +1896,27 @@ function selMC(key, qi, li) {
   renderQuestionMath(key, qi);
 }
 
-// Check free response — supports decimals, fractions, equivalent forms, multiple answers
+// Check free response — supports decimals, fractions, equivalent forms,
+// several accepted answers ("11/4, 2.75") and the "−" minus sign
 function checkFR(input, correct) {
   if (!input || !correct) return false;
-  const norm = s => s.trim().toLowerCase().replace(/\s+/g,'');
-  const evalFrac = s => {
-    s = norm(s);
+  const norm = s => String(s).trim().toLowerCase().replace(/[\u2212\u2013\u2014]/g,'-').replace(/\s+/g,'');
+  const toNum = s => {
     if (s.includes('/')) {
       const parts = s.split('/');
-      if (parts.length === 2) return parseFloat(parts[0]) / parseFloat(parts[1]);
+      return parts.length === 2 ? parseFloat(parts[0]) / parseFloat(parts[1]) : NaN;
     }
     return parseFloat(s);
   };
   const a = norm(input);
-  const va = evalFrac(a);
-  const acceptedRaw = String(correct).split(',').map(s => s.trim());
-  for (const acc of acceptedRaw) {
+  const va = toNum(a);
+  return String(correct).split(',').some(acc => {
     const b = norm(acc);
+    if (!b) return false;
     if (a === b) return true;
-    try {
-      const vb = evalFrac(b);
-      if (!isNaN(va) && !isNaN(vb) && Math.abs(va - vb) < 0.0001) return true;
-    } catch(e) {}
-  }
-  return false;
+    const vb = toNum(b);
+    return isFinite(va) && isFinite(vb) && Math.abs(va - vb) < 0.0001;
+  });
 }
 
 function openReviewMath() {
@@ -2151,5 +2161,6 @@ async function showFinalReport() {
 
 </script>
 <script src="auth.js"></script>
+<script src="report.js"></script>
 </body>
 </html>
