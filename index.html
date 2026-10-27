@@ -156,6 +156,7 @@
     #hard a.test-row { text-decoration:none; color:inherit; }
     #hard .sec-label { margin-top:1.75rem; }
     #hard .sec-label:first-child { margin-top:0; }
+    .hb-fade { animation:fadeIn .22s ease; }
     .badge-hard { font-family:'DM Mono',monospace; font-size:10px; letter-spacing:.08em; text-transform:uppercase; padding:3px 10px; border-radius:999px; background:rgba(229,56,59,.12); color:#c1272d; white-space:nowrap; }
     .hb-chips { display:flex; flex-wrap:wrap; gap:8px; margin:-.25rem 0 1rem; }
     .hb-chip { font:500 13px 'Plus Jakarta Sans',sans-serif; padding:7px 14px; border-radius:999px; border:1px solid var(--gray-border); background:var(--card); color:var(--gray-dark); cursor:pointer; transition:all .15s; }
@@ -636,6 +637,7 @@
       const nRW = HardBank.rwSets('').reduce((n, x) => n + x.length, 0), nMath = HardBank.mathSets('').reduce((n, x) => n + x.length, 0);
       document.getElementById('hb-stats').innerHTML =
         `<span><b>${nRW + nMath}</b> hard questions</span><span>${nRW} Reading &amp; Writing</span><span>${nMath} Math</span>`;
+      el.classList.add('hb-fade'); // the list arrives after the page: fade it in like a section
       el.innerHTML = ['rw', 'math'].map(k => `<div class="sec-label">${SECTIONS[k].title}</div>${chips(k)}<div id="hb-rows-${k}">${rows(k)}</div>`).join('');
     }
     document.addEventListener('click', e => {
