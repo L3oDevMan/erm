@@ -328,6 +328,10 @@
     <div class="sec-label">Available full-length tests</div>
     <div class="tests-list" id="full-list"></div>
   </div>
+  <div class="tests-section">
+    <div class="sec-label">Adaptive tests · Module 2 adapts to you · No pause</div>
+    <div class="tests-list" id="adaptive-list"></div>
+  </div>
   <footer class="site-footer"><div class="footer-copy">SATLab · 2025–2026</div><div class="footer-note">Not affiliated with College Board</div></footer>
 </div>
 
@@ -488,6 +492,16 @@
     return `<div class="test-row" onclick="window.location.href='fulltest.html?test=${n}'">
       <div class="test-idx">${String(n).padStart(2,'0')}</div>
       <div class="test-info"><div class="test-name">${name}</div><div class="test-detail">R&amp;W Module 1 &amp; 2 (27 questions each) · Math Module 1 &amp; 2 (22 questions each) · ~2h 14m total</div></div>
+      <div class="test-right"><div class="badge badge-avail">Available</div><div class="test-arrow">→</div></div>
+    </div>`;
+  }).join('');
+
+  // Build adaptive test list (10 tests)
+  document.getElementById('adaptive-list').innerHTML = Array.from({length:10},(_,i)=>{
+    const n=i+1, name=`Adaptive Test ${n}`;
+    return `<div class="test-row" onclick="window.location.href='fulltest.html?mode=adaptive&test=${n}'">
+      <div class="test-idx">${String(n).padStart(2,'0')}</div>
+      <div class="test-info"><div class="test-name">${name}</div><div class="test-detail">Like the real SAT: Module 2 gets harder or easier based on Module 1 · Timer cannot be paused · ~2h 14m total</div></div>
       <div class="test-right"><div class="badge badge-avail">Available</div><div class="test-arrow">→</div></div>
     </div>`;
   }).join('');
