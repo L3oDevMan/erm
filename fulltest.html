@@ -1055,6 +1055,8 @@ function initFullTest() {
 function showStartScreen() {
   document.getElementById('start-title').textContent = fullTestLabel;
   if (ADAPTIVE) {
+    document.querySelectorAll('[onclick="window.location.href=\'index.html\'"]').forEach(b =>
+      b.setAttribute('onclick', "window.location.href='index.html#adaptive'"));
     document.querySelector('#start-screen .start-label').textContent = 'Adaptive Practice Test';
     document.querySelector('#start-screen .start-desc').textContent =
       'Works like the real Digital SAT: each section has two modules, and how you do on Module 1 decides ' +
