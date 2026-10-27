@@ -360,6 +360,8 @@ window.addEventListener('load', () => {
   answers   = new Array(QS.length).fill(null);
   flagged   = new Array(QS.length).fill(false);
   frInputs  = new Array(QS.length).fill('');
+  // Hard sets vary in size: keep the real pace of 35 minutes per 22 questions.
+  if (HARD_MODE) { timerSecs = Math.max(60, Math.round(QS.length * 35 * 60 / 22)); drawTimer(); }
   document.getElementById('tb-module').textContent  = `Math · ${testLabel} · ${modWord} ${modId}`;
   document.getElementById('score-sub').textContent  = `${testLabel} · ${modWord} ${modId}`;
   document.getElementById('loading').classList.add('gone');
@@ -557,25 +559,27 @@ function escH(s) {
   return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// Check free response — supports decimals, fractions, equivalent forms
+// Check free response — supports decimals, fractions, equivalent forms,
+// several accepted answers ("11/4, 2.75") and the "−" minus sign
 function checkFR(input, correct) {
   if (!input || !correct) return false;
-  const norm = s => s.trim().toLowerCase().replace(/\s+/g,'');
-  const a = norm(input), b = norm(String(correct));
-  if (a===b) return true;
-  // Try numeric equivalence
-  try {
-    const evalFrac = s => {
-      if (s.includes('/')) {
-        const [n,d] = s.split('/');
-        return parseFloat(n)/parseFloat(d);
-      }
-      return parseFloat(s);
-    };
-    const va = evalFrac(a), vb = evalFrac(b);
-    if (!isNaN(va) && !isNaN(vb) && Math.abs(va-vb) < 0.0001) return true;
-  } catch(e) {}
-  return false;
+  const norm = s => String(s).trim().toLowerCase().replace(/[\u2212\u2013\u2014]/g,'-').replace(/\s+/g,'');
+  const toNum = s => {
+    if (s.includes('/')) {
+      const parts = s.split('/');
+      return parts.length === 2 ? parseFloat(parts[0]) / parseFloat(parts[1]) : NaN;
+    }
+    return parseFloat(s);
+  };
+  const a = norm(input);
+  const va = toNum(a);
+  return String(correct).split(',').some(acc => {
+    const b = norm(acc);
+    if (!b) return false;
+    if (a === b) return true;
+    const vb = toNum(b);
+    return isFinite(va) && isFinite(vb) && Math.abs(va - vb) < 0.0001;
+  });
 }
 
 // ── Review ─────────────────────────────────────────────────────

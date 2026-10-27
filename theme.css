@@ -198,3 +198,14 @@ body {
 .score-big { background:var(--gold-grad); -webkit-background-clip:text; background-clip:text; color:transparent; font-size:60px; }
 .hl-btn { border-radius:50%; }
 .loading-screen, .loading { background:var(--white); }
+
+/* Phones: hide the top-bar logo and let the top-bar buttons scroll sideways,
+   so every button (including "Review & Submit") can be reached. */
+@media (max-width: 760px) {
+  .top-bar { gap:.5rem; padding-left:.75rem; padding-right:.75rem; }
+  .top-bar .top-bar-logo, .top-bar .tb-logo, .top-bar .top-bar-sep, .top-bar .tb-sep { display:none; }
+  .top-bar-left { flex:0 1 auto; min-width:0; }
+  .top-bar-center, .tb-center { flex-shrink:0; }
+  .top-bar-right, .tb-right { flex:0 1 auto; min-width:0; flex-wrap:nowrap; overflow-x:auto; overflow-y:hidden; -webkit-overflow-scrolling:touch; }
+  .top-bar-right > *, .tb-right > * { flex-shrink:0; }
+}
