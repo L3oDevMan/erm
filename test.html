@@ -506,6 +506,7 @@
 </div>
 
 <script src="questionbank.js"></script>
+<script src="hardbank.js"></script>
 <script>
 // ══════════════════════════════════════════════════════════════
 //  STATE
@@ -516,6 +517,11 @@ const label    = params.get('label')  || 'Practice Test 1';
 const moduleId = params.get('module') || '1A';
 
 const moduleKey = `${testId}_${moduleId}`;
+// Hard Question Bank sets (test=hard) are built locally from questionbank.js by hardbank.js —
+// the question server doesn't know about them, so they're loaded and graded in the browser.
+const HARD_MODE = testId === 'hard';
+const hardSkill = params.get('skill') || '';
+const modWord   = HARD_MODE ? 'Set' : 'Module';
 let QUESTIONS = [];
 
 // ── Your Cloudflare Worker API ──────────────────────────────────
@@ -534,7 +540,12 @@ let submittedResults = {}; // filled in after grading: { [questionId]: {status, 
 // ── Load questions from the API (no answers included) ───────────
 async function initTest() {
   let rawQuestions;
-  try {
+  if (HARD_MODE) {
+    rawQuestions = (window.HardBank && typeof QUESTION_BANK !== 'undefined')
+      ? HardBank.rwSet(parseInt(moduleId, 10), hardSkill) : [];
+    // Hard sets vary in size, so scale the timer to the real-test pace (32 min / 27 questions).
+    if (rawQuestions.length) timerSecs = Math.max(60, Math.round(rawQuestions.length * 32 / 27) * 60);
+  } else try {
     const res = await fetch(`${API_BASE}/api/module?bank=${encodeURIComponent(moduleKey)}`);
     if (!res.ok) throw new Error('Bad response');
     rawQuestions = await res.json();
@@ -546,7 +557,7 @@ async function initTest() {
 
   if (!rawQuestions || rawQuestions.length === 0) {
     document.getElementById('loading-screen').innerHTML =
-      `<div style="font-family:'DM Mono',monospace;font-size:13px;color:#c0392b;">No questions found for module: ${moduleKey}</div>`;
+      `<div style="font-family:'DM Mono',monospace;font-size:13px;color:#c0392b;">No questions found for ${HARD_MODE ? 'hard set ' + moduleId + (hardSkill ? ' (' + hardSkill + ')' : '') : 'module: ' + moduleKey}</div>`;
     return;
   }
 
@@ -566,9 +577,9 @@ async function initTest() {
   initHighlights(totalQ);
 
   document.getElementById('bar-module').textContent =
-    `Writing · ${label} · Module ${moduleId}`;
+    `Writing · ${label} · ${modWord} ${moduleId}`;
   document.getElementById('score-sub').textContent =
-    `${label} · Module ${moduleId}`;
+    `${label} · ${modWord} ${moduleId}`;
 
   document.getElementById('loading-screen').classList.add('hidden');
   buildNav();
@@ -937,6 +948,19 @@ function closeOverlay(id) {
 // it saves to your account if you're logged in, or to this device
 // only if you're not (same as before).
 
+// Grade a Hard Question Bank set in the browser, returning the same shape as /api/submit-module.
+function gradeLocally(answerMap) {
+  const stats = { correct: 0, incorrect: 0, unanswered: 0 };
+  const review = QUESTIONS.map(q => {
+    const picked = answerMap[q.id];
+    const status = picked === undefined || picked === null ? 'unanswered' : picked === q.answer ? 'correct' : 'incorrect';
+    stats[status]++;
+    return { id: q.id, status, rationale: q.rationale || '', correctAnswer: q.answer };
+  });
+  const total = QUESTIONS.length;
+  return { correct: stats.correct, total, pct: total ? Math.round(stats.correct / total * 100) : 0, stats, review };
+}
+
 async function submitTest() {
   submitted = true;
   clearInterval(timerInterval);
@@ -946,7 +970,8 @@ async function submitTest() {
   QUESTIONS.forEach((q, i) => { if (answers[i] !== null) answerMap[q.id] = answers[i]; });
 
   let result;
-  try {
+  if (HARD_MODE) result = gradeLocally(answerMap);
+  else try {
     const res = await fetch(`${API_BASE}/api/submit-module`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1015,7 +1040,7 @@ async function submitTest() {
 
   await saveScoreHistory({
     type: 'english', typeLabel: 'English',
-    title: `${label} · Module ${moduleId}`,
+    title: `${label} · ${modWord} ${moduleId}`,
     correct, total: totalQ, pct,
     stats,
     breakdownLabel: 'Domain', breakdown: domainData,
