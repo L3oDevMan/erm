@@ -157,7 +157,6 @@
     #hard .sec-label, #recall .sec-label, #recycles .sec-label { margin-top:1.75rem; }
     #recycles .sec-label:first-child { margin-top:0; }
     .rc-count { font-family:'DM Mono',monospace; font-size:11px; padding:3px 10px; border-radius:999px; background:var(--gold-soft); color:var(--gold-deep); white-space:nowrap; }
-    .rc-list .test-row { cursor:default; }
     #recall .sec-label:first-child { margin-top:0; }
     #hard .sec-label:first-child { margin-top:0; }
     .hb-fade { animation:fadeIn .22s ease; }
@@ -172,7 +171,7 @@
     @media (max-width:600px) { .badge-hard { display:none; } }
   </style>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="theme.css?v=2" />
+  <link rel="stylesheet" href="theme.css?v=3" />
   <link rel="stylesheet" href="home.css?v=2" />
 </head>
 <body>
@@ -792,11 +791,11 @@
       `<div class="sec-label">Practice</div><div class="tests-list">` +
         row('all', 'All recycled questions', all, 1) +
         RecycleBank.groups.map((g, i) => row(g.key, g.name, RecycleBank.set(g.key), i + 2)).join('') +
-      `</div><div class="sec-label">Every recycled question</div><div class="tests-list rc-list">` +
-        all.map(q => `<div class="test-row">
+      `</div><div class="sec-label">Every recycled question · tap one to practice it</div><div class="tests-list rc-list">` +
+        all.map(q => `<div class="test-row" title="Practice this question" onclick="window.location.href='test.html?test=recycles&module=${q.recycle.code.toLowerCase()}&label=Recycles'">
           <div class="test-idx">${q.recycle.code}</div>
           <div class="test-info"><div class="test-name">${esc(q.recycle.title)}</div><div class="test-detail">${esc(q.skill)} · ${esc(q.recycle.sources.join(' · '))}</div></div>
-          <div class="test-right"><span class="rc-count">${q.recycle.count} tests</span></div>
+          <div class="test-right"><span class="rc-count">${q.recycle.count} tests</span><div class="test-arrow">→</div></div>
         </div>`).join('') +
       `</div><div class="hb-notice" style="margin-top:1.25rem">BMV = Bluebook Mini Verbal Test · FMT = Final Mock Test · V1 / V2 = Verbal Module 1 / 2. Choice order is shuffled between tests, so the letters here may differ from the ones you saw.</div>`;
   })();
