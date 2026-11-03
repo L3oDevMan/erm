@@ -154,7 +154,8 @@
     .hb-stats span { font-size:13px; padding:7px 14px; border-radius:999px; background:var(--card); border:1px solid var(--gray-border); }
     .hb-stats b { color:#e5383b; }
     #hard a.test-row { text-decoration:none; color:inherit; }
-    #hard .sec-label { margin-top:1.75rem; }
+    #hard .sec-label, #recall .sec-label { margin-top:1.75rem; }
+    #recall .sec-label:first-child { margin-top:0; }
     #hard .sec-label:first-child { margin-top:0; }
     .hb-fade { animation:fadeIn .22s ease; }
     .badge-hard { font-family:'DM Mono',monospace; font-size:10px; letter-spacing:.08em; text-transform:uppercase; padding:3px 10px; border-radius:999px; background:rgba(229,56,59,.12); color:#c1272d; white-space:nowrap; }
@@ -183,6 +184,7 @@
     <button class="sb-link" data-nav="fulltests" onclick="show('fulltests')"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 8h8M8 12h8M8 16h4"/></svg>Full Test</button>
     <button class="sb-link" data-nav="adaptive" onclick="show('adaptive')"><svg viewBox="0 0 24 24"><path d="M3 17l5-5 4 4 8-9"/><path d="M15 7h5v5"/></svg>Adaptive Test</button>
     <button class="sb-link" data-nav="drills" onclick="show('drills')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>Topical Drills</button>
+    <button class="sb-link" data-nav="recall" onclick="show('recall')"><svg viewBox="0 0 24 24"><path d="M12 5c-4.5 0-8 3.6-9 7 1 3.4 4.5 7 9 7s8-3.6 9-7c-1-3.4-4.5-7-9-7z"/><path d="M9.5 12a2.5 2.5 0 1 0 5 0"/></svg>Active Recall</button>
     <button class="sb-link" data-nav="hard" onclick="show('hard')"><svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg>Hard Question Bank</button>
     <div class="sb-label">You</div>
     <button class="sb-link" onclick="window.location.href='weakness.html'"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Weakness Profile</button>
@@ -298,6 +300,19 @@
         </div>
       </div>
     </div>
+    <div class="subject-card c-recall" onclick="show('recall')">
+      <div class="card-top"><div class="card-tag">Reading &amp; Writing</div><div class="card-arrow">↗</div></div>
+      <div class="card-title">Active Recall</div>
+      <div class="card-desc">Read a passage, watch it disappear, then write what you remember and answer from memory — like TOEFL iBT reading.</div>
+      <div class="card-tests">
+        <div class="card-tests-lbl">Format</div>
+        <div class="card-test-list">
+          <div class="card-test-item">60 seconds to read, then the passage hides</div>
+          <div class="card-test-item">Write what you remember and/or answer the question</div>
+          <div class="card-test-item">Compare with the passage and the answer key</div>
+        </div>
+      </div>
+    </div>
     <div class="subject-card c-hard" onclick="show('hard')">
       <div class="card-top"><div class="card-tag">Math + Reading &amp; Writing</div><div class="card-arrow">↗</div></div>
       <div class="card-title">Hard Question Bank</div>
@@ -380,6 +395,24 @@
     <div class="sec-label">Available adaptive tests</div>
     <div class="tests-list" id="adaptive-list"></div>
   </div>
+  <footer class="site-footer"><div class="footer-copy">SATLab · 2025–2026</div><div class="footer-note">Not affiliated with College Board</div></footer>
+</div>
+
+<!-- ACTIVE RECALL -->
+<div id="recall" class="page">
+  <header class="site-header">
+    <div class="logo" onclick="show('home')">SATLab</div>
+    <div class="hdr-right">
+      <div class="breadcrumb"><span class="crumb" onclick="show('home')">Home</span><span class="sep">/</span><span class="cur">Active Recall</span></div>
+      <button class="back-btn" onclick="show('home')">← Back</button>
+    </div>
+  </header>
+  <div class="subj-hero">
+    <div class="subj-label">SAT · Reading &amp; Writing Memory Training</div>
+    <div class="subj-title">Active Recall</div>
+    <div class="subj-meta">Read each passage for 60 seconds. Then it disappears: write what you remember and answer the question from memory, then compare with the original. Builds the habit of really taking in what you read.</div>
+  </div>
+  <div class="tests-section" id="recall-sets"></div>
   <footer class="site-footer"><div class="footer-copy">SATLab · 2025–2026</div><div class="footer-note">Not affiliated with College Board</div></footer>
 </div>
 
@@ -704,6 +737,21 @@
   ];
   const DOMAIN_ORDER_RW = ['Information and Ideas','Craft and Structure','Expression of Ideas','Standard English Conventions'];
 
+  // Active Recall: the reading skills, split into the same sets as the drills.
+  // Grammar skills are left out — they don't test memory of a passage.
+  (function renderRecallSets(){
+    const ORDER = ['inferences','central-ideas-and-details','command-of-evidence','text-structure-and-purpose','cross-text-connections','words-in-context'];
+    document.getElementById('recall-sets').innerHTML = ORDER.map(slug => {
+      const t = DRILL_TOPICS.find(x => x.slug === slug); if (!t) return '';
+      return `<div class="sec-label">${t.skill}</div><div class="tests-list">` + t.sizes.map((n, i) =>
+        `<div class="test-row" onclick="window.location.href='recall.html?skill=${slug}&set=${i+1}'">
+          <div class="test-idx">${String(i+1).padStart(2,'0')}</div>
+          <div class="test-info"><div class="test-name">${t.skill} · Set ${i+1}</div><div class="test-detail">${n} passages · read, recall, compare · ~${Math.round(n*2)} min</div></div>
+          <div class="test-right"><div class="badge badge-avail">Available</div><div class="test-arrow">→</div></div>
+        </div>`).join('') + '</div>';
+    }).join('');
+  })();
+
   // Build topic list, grouped by domain
   (function renderDrillTopics(){
     let html = '', n = 1;
@@ -782,7 +830,7 @@
   }
   updateCountdown();
   setInterval(updateCountdown, 1000);
-  { const h = location.hash.slice(1); if (['math','english','fulltests','adaptive','drills','hard'].includes(h)) show(h); }
+  { const h = location.hash.slice(1); if (['math','english','fulltests','adaptive','drills','recall','hard'].includes(h)) show(h); }
 </script>
 
 <div class="reco-popup" id="reco-popup">

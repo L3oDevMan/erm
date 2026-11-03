@@ -8,6 +8,7 @@
     full:'<rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 8h8M8 12h8M8 16h4"/>',
     adapt:'<path d="M3 17l5-5 4 4 8-9"/><path d="M15 7h5v5"/>',
     drill:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/>',
+    recall:'<path d="M12 5c-4.5 0-8 3.6-9 7 1 3.4 4.5 7 9 7s8-3.6 9-7c-1-3.4-4.5-7-9-7z"/><path d="M9.5 12a2.5 2.5 0 1 0 5 0"/>',
     hard:'<path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/>',
     weak:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>', hist:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
     set:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>'
@@ -21,7 +22,7 @@
     '<div class="sb-brand" onclick="location.href=\'index.html\'"><i>S</i>SATLab</div><nav class="sb-nav">' +
     a('index.html', 'home', 'Home') + '<div class="sb-label">Practice</div>' +
     a('index.html#math', 'math', 'Math') + a('index.html#english', 'eng', 'Writing') +
-    a('index.html#fulltests', 'full', 'Full Test') + a('index.html#adaptive', 'adapt', 'Adaptive Test') + a('index.html#drills', 'drill', 'Topical Drills') +
+    a('index.html#fulltests', 'full', 'Full Test') + a('index.html#adaptive', 'adapt', 'Adaptive Test') + a('index.html#drills', 'drill', 'Topical Drills') + a('index.html#recall', 'recall', 'Active Recall') +
     a('index.html#hard', 'hard', 'Hard Question Bank') +
     '<div class="sb-label">You</div>' +
     a('weakness.html', 'weak', 'Weakness Profile', 'weakness.html') +
