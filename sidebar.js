@@ -21,9 +21,9 @@
   el.className = 'sidebar'; el.setAttribute('aria-label', 'Main navigation');
   el.innerHTML =
     '<div class="sb-brand" onclick="location.href=\'index.html\'"><i>S</i>SATLab</div><nav class="sb-nav">' +
-    a('index.html', 'home', 'Home') + '<div class="sb-label">Practice</div>' +
+    a('index.html', 'home', 'Home') + '<div class="sb-label">Practice</div>' + a('index.html#adaptive', 'adapt', 'Adaptive Test') +
     a('index.html#math', 'math', 'Math') + a('index.html#english', 'eng', 'Writing') +
-    a('index.html#fulltests', 'full', 'Full Test') + a('index.html#adaptive', 'adapt', 'Adaptive Test') + a('index.html#drills', 'drill', 'Topical Drills') + a('index.html#recall', 'recall', 'Active Recall') +
+    a('index.html#fulltests', 'full', 'Full Test') + a('index.html#drills', 'drill', 'Topical Drills') + a('index.html#recall', 'recall', 'Active Recall') +
     a('index.html#hard', 'hard', 'Hard Question Bank') +
     a('index.html#recycles', 'recycle', 'Recycles') +
     '<div class="sb-label">You</div>' +
