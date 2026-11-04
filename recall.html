@@ -181,6 +181,8 @@ let currentQ = 0;
 const prefs = loadPrefs();
 let results = [];          // per question: { recall, choice, rating, keyPct }
 let phase = 'start';       // start | read | recall | answer | compare | done
+// On the start and results screens no single question is on screen, so report none.
+window.SATReportContext = () => (phase === 'start' || phase === 'done') ? { questionNumber: null, questionId: '' } : {};
 let timer = null, secsLeft = 0;
 
 function loadPrefs() {

@@ -128,6 +128,9 @@
       .total-score-card { flex-direction:column; align-items:flex-start; }
       .dom-name { width:110px; }
     }
+    /* Guest "Log in" link: theme colour instead of the browser's default blue (unreadable on navy in dark mode) */
+    #sync-status a { color: var(--gold); text-decoration: underline; text-underline-offset: 2px; }
+    :root[data-theme="dark"] #sync-status a { color: var(--gold-2); }
   </style>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="theme.css?v=5" />
