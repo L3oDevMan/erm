@@ -940,8 +940,9 @@ function buildEnglishModule(rng, excludeIds, mix) {
 // ── Build random Math module (22 questions: 17 MC + 5 FR, domain-balanced) ──
 function buildMathModule(rng, excludeIds, mix) {
   const DOMAINS = ['Algebra', 'Advanced Math', 'Problem-Solving and Data Analysis', 'Geometry and Trigonometry'];
-  const MC_PER = {'Algebra': 5, 'Advanced Math': 5, 'Problem-Solving and Data Analysis': 4, 'Geometry and Trigonometry': 3};
-  const FR_PER = {'Algebra': 1, 'Advanced Math': 1, 'Problem-Solving and Data Analysis': 2, 'Geometry and Trigonometry': 1};
+  // Like the real SAT (about 35% / 35% / 15% / 15%): Algebra 8, Advanced Math 7, PSDA 4, Geometry 3.
+  const MC_PER = {'Algebra': 6, 'Advanced Math': 6, 'Problem-Solving and Data Analysis': 3, 'Geometry and Trigonometry': 2};
+  const FR_PER = {'Algebra': 2, 'Advanced Math': 1, 'Problem-Solving and Data Analysis': 1, 'Geometry and Trigonometry': 1};
 
   const mcPools = {}, frPools = {};
   DOMAINS.forEach(d => { mcPools[d] = []; frPools[d] = []; });
@@ -1022,8 +1023,9 @@ function initFullTest() {
   } else {
     sectionData.eng1.questions = buildEnglishModule(rng, usedIds);
     sectionData.eng2.questions = buildEnglishModule(rng, usedIds);
-    sectionData.math1.questions = buildMathModule(rng, usedMathIds);
-    sectionData.math2.questions = buildMathModule(rng, usedMathIds);
+    // The Math bank is mostly Easy questions; ask for an even Easy/Medium/Hard spread like the real test.
+    sectionData.math1.questions = buildMathModule(rng, usedMathIds, DIFFICULTY_MIX.routing);
+    sectionData.math2.questions = buildMathModule(rng, usedMathIds, DIFFICULTY_MIX.routing);
   }
 
   // ── Diagnostic: check every math question's page key exists in MATH_IMAGES ──
