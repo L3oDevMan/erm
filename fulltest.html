@@ -489,13 +489,15 @@
       .divider { display: none; }
       .question-pane { flex: none; overflow: visible; min-width: 0; width: 100% !important; padding: 1.25rem; }
       .tool-pane { display: none; }
+      /* Phones: the open Calculator/Desmos pane is a bottom sheet above the bottom bar. */
+      .tool-pane:not(.closed) { display: flex; position: fixed; left: 0; right: 0; bottom: 60px; width: auto; height: 60vh; max-height: calc(100vh - 130px); z-index: 250; background: var(--white); border-left: none; border-top: 1px solid var(--gray-border); box-shadow: 0 -6px 20px rgba(0,0,0,0.15); }
       .module-result-grid { grid-template-columns: 1fr; }
       .total-score-card { flex-direction: column; align-items: flex-start; }
       .section-scores { width: 100%; justify-content: space-between; }
     }
   </style>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="theme.css?v=4" />
+  <link rel="stylesheet" href="theme.css?v=5" />
 </head>
 <body>
 
@@ -750,7 +752,7 @@
     <div class="domain-breakdown" id="math-domain-breakdown"></div>
 
     <div class="report-actions">
-      <button class="btn-start" onclick="window.location.href='fulltest.html'">Take Another Full Test</button>
+      <button class="btn-start" onclick="window.location.href='fulltest.html?test=' + (parseInt(fullTestNum) % 10 + 1)">Take Another Full Test</button>
       <button class="btn-back-home" onclick="window.location.href='index.html'">← Back to Tests</button>
     </div>
   </div>
@@ -760,6 +762,7 @@
 <script src="questionbank.js"></script>
 <script src="math_modules.js"></script>
 <script src="math_images.js"></script>
+<script src="math_explain.js"></script>
 <script>
 // ══════════════════════════════════════════════════════════════
 //  SAT SCORING CURVES (approximate official Digital SAT curves)
@@ -792,7 +795,7 @@ function rawToScaled(raw, curve, maxRaw) {
 //  STATE
 // ══════════════════════════════════════════════════════════════
 const params = new URLSearchParams(window.location.search);
-const fullTestNum = params.get('test') || '1';
+const fullTestNum = String(Math.max(1, parseInt(params.get('test')) || 1));
 // Adaptive mode (fulltest.html?mode=adaptive&test=N): Module 2 of each section is
 // harder or easier depending on Module 1, like the real Digital SAT. No pause button.
 const ADAPTIVE = params.get('mode') === 'adaptive';
@@ -1971,7 +1974,7 @@ function renderQuestionMath(key, i) {
     } else {
       ansHtml = `<div class="fr-wrap">
         <div class="fr-label">Enter your answer</div>
-        <input id="fr-inp" class="fr-input" type="text" inputmode="decimal"
+        <input id="fr-inp" class="fr-input" type="text" inputmode="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"
           value="${escHtml(val)}" placeholder="e.g. 3/2"
           oninput="sectionData['${key}'].frInputs[${i}]=this.value;updateNavMath('${key}')"
           onkeydown="if(event.key==='Enter'&&${i}<sectionData['${key}'].questions.length-1)goToQuestionMath('${key}',${i}+1)" />
@@ -1990,6 +1993,7 @@ function renderQuestionMath(key, i) {
     ${q.question ? `<div class="q-text-block" style="font-size:16px;line-height:1.6;padding:1rem 1.25rem;border:1px solid var(--gray-border);border-radius:4px;background:var(--white)">${escHtml(q.question)}</div>` : imgSrc?`<div class="q-img-wrap"><img src="${imgSrc}" alt="Q${i+1}" onerror="this.parentElement.innerHTML='<div style=&quot;padding:1rem;color:var(--incorrect);font-size:13px&quot;>Image failed to load for page ${q.page} (question ${q.id}).</div>'"/></div>`
             :`<div style="padding:1rem;color:var(--gray-mid);font-size:13px">No image found for page ${q.page} (question ${q.id}).</div>`}
     ${ansHtml}
+    ${submitted && window.mathExplainHTML ? mathExplainHTML(q, escHtml) : ''}
     <label class="flag-row">
       <input type="checkbox" ${sd.flagged[i]?'checked':''} onchange="sectionData['${key}'].flagged[${i}]=this.checked;updateNavMath('${key}')">
       <span class="flag-lbl">Flag for review</span>
@@ -2085,20 +2089,25 @@ function submitMathModule() {
 }
 
 // ── Calculator ──
-let calcExpr = '';
-function cn(d) { calcExpr += d; updateCalcDisplay(); }
-function cf(f) { calcExpr += f; updateCalcDisplay(); }
-function cBk() { calcExpr = calcExpr.endsWith('**') ? calcExpr.slice(0,-2) : calcExpr.endsWith('Math.PI') ? calcExpr.slice(0,-7) : calcExpr.slice(0,-1); updateCalcDisplay(); }
-function cClr() { calcExpr = ''; document.getElementById('c-res').textContent = '0'; updateCalcDisplay(); }
+let calcExpr = '', justEvaluated = false;
+function cn(d) { if (justEvaluated) calcExpr = ''; justEvaluated = false; calcExpr += d; updateCalcDisplay(); }
+// After "=", an operator continues from the result; anything else starts a new expression.
+function cf(f) { if (justEvaluated && !/^(\*\*|[*\/+\-)])$/.test(f)) calcExpr = ''; justEvaluated = false; calcExpr += f; updateCalcDisplay(); }
+function cBk() { justEvaluated = false; calcExpr = calcExpr.endsWith('**') ? calcExpr.slice(0,-2) : calcExpr.endsWith('Math.PI') ? calcExpr.slice(0,-7) : calcExpr.slice(0,-1); updateCalcDisplay(); }
+function cClr() { calcExpr = ''; justEvaluated = false; document.getElementById('c-res').textContent = '0'; updateCalcDisplay(); }
 function updateCalcDisplay() { document.getElementById('c-expr').textContent = calcExpr.replace(/\*\*/g,'^').replace(/Math\.PI/g,'π'); }
 function cEval() {
   try {
     const sanitized = calcExpr.replace(/sqrt\(/g, 'Math.sqrt(').replace(/sin\(/g,'Math.sin(')
       .replace(/cos\(/g,'Math.cos(').replace(/tan\(/g,'Math.tan(').replace(/log\(/g,'Math.log10(')
-      .replace(/ln\(/g,'Math.log(');
+      .replace(/ln\(/g,'Math.log(')
+      // unary minus -> (-1)* so -3^2 = -9 (JS rejects -3**2); 2^-3 is already valid
+      .replace(/(\*\*|^|[(*\/+\-])-/g, (m, p) => p === '**' ? m : p + '(-1)*');
     const result = Function('"use strict";return ('+sanitized+')')();
     document.getElementById('c-res').textContent = Number.isFinite(result) ? String(Math.round(result*1e10)/1e10) : 'Error';
     calcExpr = String(result);
+    justEvaluated = true;
+    updateCalcDisplay();
   } catch(e) {
     document.getElementById('c-res').textContent = 'Error';
   }
@@ -2265,7 +2274,9 @@ async function showFinalReport() {
   );
   document.getElementById('math-domain-breakdown').innerHTML = mathBreakdownResult.html;
 
-  await saveScoreHistory({
+  document.getElementById('report-screen').style.display = 'block';
+
+  saveScoreHistory({
     type: 'fulltest', typeLabel: ADAPTIVE ? 'Adaptive Test' : 'Full Test',
     title: fullTestLabel,
     correct: total, total: 1600, pct: Math.round(total/1600*100),
@@ -2279,9 +2290,7 @@ async function showFinalReport() {
       ],
       rwBreakdown, mathBreakdown: mathBreakdownResult.data
     }
-  });
-
-  document.getElementById('report-screen').style.display = 'block';
+  }).catch(() => {});
 }
 
 

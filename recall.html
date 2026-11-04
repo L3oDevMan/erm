@@ -79,7 +79,7 @@
     .passage-chart-wrap { margin:.75rem 0; } .passage-chart-img { max-width:100%; }
     .passage-chart-note { font-size:13px; color:var(--gray-mid); font-style:italic; margin:.5rem 0; }
     mark.rc-hit { background:rgba(31,138,76,.18); color:inherit; border-radius:4px; padding:0 2px; }
-    mark.rc-miss { background:none; color:inherit; text-decoration:underline wavy rgba(209,73,59,.75); text-underline-offset:3px; }
+    mark.rc-miss { background:rgba(209,73,59,.16); color:inherit; border-radius:2px; box-shadow:0 0 0 1px rgba(209,73,59,.35); }
     .got { display:flex; flex-wrap:wrap; gap:6px; margin-top:.5rem; }
     .got span { font-size:12px; padding:3px 9px; border-radius:999px; background:rgba(31,138,76,.12); color:var(--correct); }
 
@@ -125,7 +125,7 @@
     }
   </style>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="theme.css?v=4" />
+  <link rel="stylesheet" href="theme.css?v=5" />
 </head>
 <body>
 
@@ -246,7 +246,7 @@ function startQuestion(i) {
   secsLeft = prefs.secs;
   render(`${header('read')}
     <div class="bar" id="bar"><i style="width:100%"></i></div>
-    <div class="card" id="passage">${passageHTML(q)}</div>
+    <div class="card" id="passage">${applyUnderline(passageHTML(q), q)}</div>
     <div class="actions"><button class="btn primary" onclick="endReading()">I’m ready — hide the passage</button></div>`);
   tick();
   clearInterval(timer);
@@ -313,7 +313,7 @@ function showCompare() {
       <div class="your-recall${r.recall ? '' : ' empty'}">${r.recall ? esc(r.recall) : 'You didn’t write anything.'}</div>
       <div class="stat"><b>${hit.length}/${kw.length}</b><span>key words from the passage</span></div>
       ${hit.length ? `<div class="hint" style="margin:0">You remembered:</div><div class="got">${hit.map(m => `<span>${esc(m.w)}</span>`).join('')}</div>` : ''}
-      ${missed.length ? `<div class="hint" style="margin:.6rem 0 0">You missed (underlined in the passage):</div><div class="missed">${missed.map(m => `<span>${esc(m.w)}</span>`).join('')}</div>` : ''}
+      ${missed.length ? `<div class="hint" style="margin:.6rem 0 0">You missed (marked in red in the passage):</div><div class="missed">${missed.map(m => `<span>${esc(m.w)}</span>`).join('')}</div>` : ''}
       <div class="rate"><div class="opt-label" style="margin-top:0">How much did you remember?</div>
         <div class="pills" id="rate">${['Most of it', 'Some of it', 'Very little'].map((l, i) => `<button class="pill${r.rating === i ? ' on' : ''}" data-r="${i}">${l}</button>`).join('')}</div></div>
     </div>`;
@@ -333,7 +333,7 @@ function showCompare() {
   const last = currentQ === QUESTIONS.length - 1;
   render(`${header('compare')}
     <div class="${writes() ? 'compare' : ''}">
-      <div class="card"><div class="col-title">Original passage</div><div id="passage">${passageHTML(q)}</div></div>
+      <div class="card"><div class="col-title">Original passage</div><div id="passage">${applyUnderline(passageHTML(q), q)}</div></div>
       ${recallCol}
     </div>
     ${answerBlock}
@@ -424,8 +424,9 @@ function keywordsOf(text) {
 // share a start (photograph / photosynthesis).
 function sameWord(a, b) {
   if (a === b) return true;
-  const [s, l] = a.length <= b.length ? [a, b] : [b, a];
-  return s.length >= 5 && l.startsWith(s);
+  // Same word in another form (prefer / preferred). A cut-off fragment ("phase" for "phaseolus") doesn't count.
+  const [sh, lo] = a.length <= b.length ? [a, b] : [b, a];
+  return sh.length >= 5 && lo.startsWith(sh) && sh.length >= lo.length * 0.75;
 }
 function markKeywords(root, marks) {
   if (!root || !marks) return;
@@ -452,6 +453,83 @@ function markKeywords(root, marks) {
 }
 
 // ── Passage rendering (same structure as the drill pages) ─────
+// Underline the parts of the passage the question points to ("the underlined sentence").
+function applyUnderline(html, q) {
+  const segments = q.underline_segments;
+  if (!segments || !segments.length) return html;
+
+  function norm(s) {
+    return s.replace(/\s+/g, ' ')
+            .replace(/[\u2018\u2019\u02bc]/g, "'")
+            .replace(/[\u201c\u201d]/g, '"')
+            .replace(/[\u2013\u2014]/g, '-')
+            .replace(/\u2019/g, "'")
+            .trim();
+  }
+
+  // Walk the HTML char-by-char, skipping tag content, to find and wrap each segment
+  let cursor = 0; // segments are in document order: look after the last one first, so a repeated phrase gets the right occurrence
+  function wrapSegment(htmlStr, segText, nextText) {
+    const segNorm = norm(esc(segText)); // the HTML is escaped (& -> &amp;), so escape the segment the same way or positions don't line up
+    if (!segNorm) return htmlStr;
+
+    // Build plain-text version (strip tags) to locate the segment
+    let plain = '';
+    let inTag = false;
+    for (let i = 0; i < htmlStr.length; i++) {
+      if (htmlStr[i] === '<') { inTag = true; continue; }
+      if (htmlStr[i] === '>') { inTag = false; continue; }
+      if (!inTag) plain += htmlStr[i];
+    }
+    const plainNorm = norm(plain);
+
+    // Try exact match. A segment that continues on the next line (the next segment follows it
+    // directly) is placed where that whole run occurs, so an earlier copy of a short word isn't picked.
+    let idx = -1;
+    const run = nextText ? segNorm + ' ' + norm(esc(nextText)) : '';
+    if (run) { idx = plainNorm.indexOf(run, cursor); if (idx === -1) idx = plainNorm.indexOf(run); }
+    if (idx === -1) idx = plainNorm.indexOf(segNorm, cursor);
+    if (idx === -1) idx = plainNorm.indexOf(segNorm);
+    if (idx === -1) {
+      // Try first 40 chars of segment (handles truncated multi-line rects)
+      const partial = segNorm.substring(0, Math.min(40, segNorm.length));
+      idx = plainNorm.indexOf(partial, cursor);
+      if (idx === -1) idx = plainNorm.indexOf(partial);
+      if (idx === -1) return htmlStr; // can't find it
+    }
+
+    const endIdx = idx + segNorm.length;
+
+    // Map plain-text char positions back to HTML positions and wrap
+    let charCount = 0, inT = false;
+    let startHtmlPos = -1, endHtmlPos = -1;
+    for (let i = 0; i < htmlStr.length; i++) {
+      // Check the end before skipping a tag: a segment that ends right before a tag must
+      // close there, or the browser carries the open <u> over the rest of the passage.
+      if (charCount === endIdx && endHtmlPos === -1 && startHtmlPos !== -1) { endHtmlPos = i; break; }
+      if (htmlStr[i] === '<') { inT = true; }
+      if (!inT) {
+        if (charCount === idx && startHtmlPos === -1) startHtmlPos = i;
+        charCount++;
+      }
+      if (htmlStr[i] === '>') { inT = false; }
+    }
+    if (endHtmlPos === -1) endHtmlPos = htmlStr.length;
+    if (startHtmlPos === -1) return htmlStr;
+    cursor = endIdx;
+
+    return htmlStr.slice(0, startHtmlPos) +
+           '<u>' + htmlStr.slice(startHtmlPos, endHtmlPos) + '</u>' +
+           htmlStr.slice(endHtmlPos);
+  }
+
+  // Apply each segment in order
+  let result = html;
+  segments.forEach((seg, k) => {
+    result = wrapSegment(result, seg, segments[k + 1]);
+  });
+  return result;
+}
 function passageText(q) {
   if (q.passage_lines && q.passage_lines.length)
     return q.passage_lines.map(l => l.text || (l.type === 'table' ? [l.title || '', ...(l.headers || []), ...(l.rows || []).flat()].join(' ') : '')).join(' ').replace(/\s+/g, ' ').trim();
