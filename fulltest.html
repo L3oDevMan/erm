@@ -490,6 +490,7 @@
       .question-pane { flex: none; overflow: visible; min-width: 0; width: 100% !important; padding: 1.25rem; }
       .tool-pane { display: none; }
       /* Phones: the open Calculator/Desmos pane is a bottom sheet above the bottom bar. */
+      .test-body:has(.tool-pane:not(.closed)) .q-pane { padding-bottom: calc(60vh + 1rem); }
       .tool-pane:not(.closed) { display: flex; position: fixed; left: 0; right: 0; bottom: 60px; width: auto; height: 60vh; max-height: calc(100vh - 130px); z-index: 250; background: var(--white); border-left: none; border-top: 1px solid var(--gray-border); box-shadow: 0 -6px 20px rgba(0,0,0,0.15); }
       .module-result-grid { grid-template-columns: 1fr; }
       .total-score-card { flex-direction: column; align-items: flex-start; }
@@ -940,8 +941,9 @@ function buildEnglishModule(rng, excludeIds, mix) {
 // ── Build random Math module (22 questions: 17 MC + 5 FR, domain-balanced) ──
 function buildMathModule(rng, excludeIds, mix) {
   const DOMAINS = ['Algebra', 'Advanced Math', 'Problem-Solving and Data Analysis', 'Geometry and Trigonometry'];
-  const MC_PER = {'Algebra': 5, 'Advanced Math': 5, 'Problem-Solving and Data Analysis': 4, 'Geometry and Trigonometry': 3};
-  const FR_PER = {'Algebra': 1, 'Advanced Math': 1, 'Problem-Solving and Data Analysis': 2, 'Geometry and Trigonometry': 1};
+  // Like the real SAT (about 35% / 35% / 15% / 15%): Algebra 8, Advanced Math 7, PSDA 4, Geometry 3.
+  const MC_PER = {'Algebra': 6, 'Advanced Math': 6, 'Problem-Solving and Data Analysis': 3, 'Geometry and Trigonometry': 2};
+  const FR_PER = {'Algebra': 2, 'Advanced Math': 1, 'Problem-Solving and Data Analysis': 1, 'Geometry and Trigonometry': 1};
 
   const mcPools = {}, frPools = {};
   DOMAINS.forEach(d => { mcPools[d] = []; frPools[d] = []; });
@@ -1022,8 +1024,9 @@ function initFullTest() {
   } else {
     sectionData.eng1.questions = buildEnglishModule(rng, usedIds);
     sectionData.eng2.questions = buildEnglishModule(rng, usedIds);
-    sectionData.math1.questions = buildMathModule(rng, usedMathIds);
-    sectionData.math2.questions = buildMathModule(rng, usedMathIds);
+    // The Math bank is mostly Easy questions; ask for an even Easy/Medium/Hard spread like the real test.
+    sectionData.math1.questions = buildMathModule(rng, usedMathIds, DIFFICULTY_MIX.routing);
+    sectionData.math2.questions = buildMathModule(rng, usedMathIds, DIFFICULTY_MIX.routing);
   }
 
   // ── Diagnostic: check every math question's page key exists in MATH_IMAGES ──
@@ -2102,7 +2105,7 @@ function cEval() {
       .replace(/cos\(/g,'Math.cos(').replace(/tan\(/g,'Math.tan(').replace(/log\(/g,'Math.log10(')
       .replace(/ln\(/g,'Math.log(')
       // unary minus -> (-1)* so -3^2 = -9 (JS rejects -3**2); 2^-3 is already valid
-      .replace(/(\*\*|^|[(*\/+\-])-/g, (m, p) => p === '**' ? m : p + '(-1)*');
+      .replace(/(\*\*|^|[(*\/+\-])-/g, (m, p) => p === '**' ? m : p === '/' ? '/(-1)/' : p + '(-1)*'); // 8/-2 → 8/(-1)/2
     const result = Function('"use strict";return ('+sanitized+')')();
     document.getElementById('c-res').textContent = Number.isFinite(result) ? String(Math.round(result*1e10)/1e10) : 'Error';
     calcExpr = String(result);

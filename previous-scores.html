@@ -242,7 +242,7 @@
     if (token) {
       const email = await authVerifySession();
       if (email) {
-        await uploadPending(token);
+        await uploadPending(token, email);
         let fromServer = null;
         try {
           const res = await fetch(`${AUTH_API_BASE}/api/my-results`, {
@@ -277,14 +277,28 @@
 
   // Results saved on this device while the server was unreachable (marked pendingSync by auth.js):
   // send them to the account now, and drop the local copy once the server has them.
-  async function uploadPending(token) {
-    let list;
-    try { list = JSON.parse(localStorage.getItem(HKEY) || '[]'); } catch (e) { return; }
-    if (!Array.isArray(list)) return;
+  // Only records saved under this same account are sent (a shared device may hold someone else's).
+  async function uploadPending(token, email) {
+    const readList = () => { try { const l = JSON.parse(localStorage.getItem(HKEY) || '[]'); return Array.isArray(l) ? l : []; } catch (e) { return []; } };
+    const now = Date.now();
+    const mine = readList().filter(x => x && x.pendingSync && x.pendingSync === email && !(x.syncing && now - x.syncing < 30000));
+    if (!mine.length) return;
+    // Claim them first so another open tab doesn't upload the same ones.
+    const ids = new Set(mine.map(x => x.id));
+    try { localStorage.setItem(HKEY, JSON.stringify(readList().map(x => x && ids.has(x.id) ? { ...x, syncing: now } : x))); } catch (e) { return; }
+    // A save that timed out may still have reached the server: skip results it already has.
+    let server = [];
+    try {
+      const res = await fetch(`${AUTH_API_BASE}/api/my-results`, { headers: { 'Authorization': `Bearer ${token}` } });
+      if (res.ok) server = await res.json();
+    } catch (e) {}
+    const already = r => Array.isArray(server) && server.some(s => s && s.title === r.title && s.correct === r.correct &&
+      s.total === r.total && Math.abs(new Date(s.date) - new Date(r.date)) < 120000);
     const done = new Set();
-    for (const r of list.filter(x => x && x.pendingSync)) {
+    for (const r of mine) {
+      if (already(r)) { done.add(r.id); continue; }
       try {
-        const { pendingSync, id, ...rec } = r;
+        const { pendingSync, syncing, id, ...rec } = r;
         const res = await fetch(`${AUTH_API_BASE}/api/save-result`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
@@ -293,14 +307,18 @@
         if (res.ok) done.add(r.id);
       } catch (e) { break; }
     }
-    if (done.size) { try { localStorage.setItem(HKEY, JSON.stringify(list.filter(x => !done.has(x.id)))); } catch (e) {} }
+    // Re-read before writing so results another tab added meanwhile aren't lost.
+    try {
+      localStorage.setItem(HKEY, JSON.stringify(readList().filter(x => !(x && done.has(x.id)))
+        .map(x => x && ids.has(x.id) ? (({ syncing, ...rest }) => rest)(x) : x)));
+    } catch (e) {}
   }
 
   // Old or partial records shouldn't break the list: give every entry an id and the fields the page reads.
   function normalize(list) {
     if (!Array.isArray(list)) return [];
     return list.filter(r => r && typeof r === 'object').map((r, i) => {
-      if (r.id == null || r.id === '') r.id = 'r' + i + '-' + String(r.date || '');
+      if (r.id == null || r.id === '') { r.id = 'r' + i + '-' + String(r.date || ''); r._madeId = true; } // not the server's id
       if (r.type === 'fulltest' && (!r.fulltest || typeof r.fulltest !== 'object')) r.fulltest = { total: '—', rw: '—', math: '—' };
       if (!r.stats || typeof r.stats !== 'object') r.stats = { correct: r.correct ?? '—', incorrect: '—', unanswered: '—' };
       return r;
@@ -385,7 +403,7 @@
         const res = await fetch(`${AUTH_API_BASE}/api/delete-result`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authGetToken()}` },
-          body: JSON.stringify({ ids })
+          body: JSON.stringify({ ids: ids.filter(x => !(history.find(r => r.id === x) || {})._madeId) })
         });
         if (!res.ok) throw new Error('delete failed');
       } catch (e) { alert("Couldn't delete — check your connection and try again."); return; }
