@@ -191,7 +191,7 @@ const $ = id => document.getElementById(id);
 
 window.addEventListener('load', () => {
   if (typeof DRILL_BANK === 'undefined') { $('load-lbl').textContent = 'Couldn’t load the question bank. Check your connection and reload.'; return; }
-  QUESTIONS = DRILL_BANK[`${skillSlug}_${setNum}`] || [];
+  QUESTIONS = (DRILL_BANK[`${skillSlug}_${setNum}`] || []).filter(q => !q.unusable); // skip questions whose graph was lost
   if (!QUESTIONS.length) { $('load-lbl').textContent = `No questions found for ${skillName} · Set ${setNum}.`; return; }
   results = QUESTIONS.map(() => ({ recall: '', choice: null, rating: null, keyPct: null }));
   $('bar-module').textContent = `Active Recall · ${skillName} · Set ${setNum}`;

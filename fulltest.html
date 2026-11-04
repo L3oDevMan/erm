@@ -897,7 +897,7 @@ function buildEnglishModule(rng, excludeIds, mix) {
   for (const modKey in QUESTION_BANK) {
     for (const q of QUESTION_BANK[modKey]) {
       const match = DOMAIN_ORDER.find(d => q.domain && q.domain.startsWith(d));
-      if (match && !excludeIds.has(q.id)) pools[match].push(q);
+      if (match && !excludeIds.has(q.id) && !q.unusable) pools[match].push(q); // skip questions whose graph was lost
     }
   }
   DOMAIN_ORDER.forEach(d => pools[d] = shuffleArray(pools[d], rng));
