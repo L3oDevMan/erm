@@ -1,5 +1,5 @@
 // math_modules.js — SAT Math question bank
-// Every question is one image in math_images.js (page = its image key). Answers, type, domain, skill and
+// Every question is one image, math_img/<page>.jpg (page = its image number). Answers, type, domain, skill and
 // difficulty were worked out from the image itself (Nov 2026 re-key: the old answer key did not match the
 // images). 15 tests × 4 modules of 21–22 questions; each module has 5–6 student-produced answers,
 // domains spread as evenly as the bank allows (it has few Geometry questions), ordered easy → hard.
