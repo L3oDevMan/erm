@@ -451,7 +451,7 @@ function cd() { document.getElementById('c-expr').textContent=ce.replace(/\*\*/g
 function cEval() {
   try {
     // Unary minus becomes (-1)* so "-8^2" = -64 (JS rejects -8**2); right after ** JS already allows it.
-    let e=ce.replace(/(\*\*|^|[(*\/+\-])-/g,(m,p)=>p==='**'?m:p+'(-1)*');
+    let e=ce.replace(/(\*\*|^|[(*\/+\-])-/g,(m,p)=>p==='**'?m:p==='/'?'/(-1)/':p+'(-1)*'); // 8/-2 → 8/(-1)/2
     e=e.replace(/sqrt\(/g,'Math.sqrt(').replace(/sin\(/g,'Math.sin(').replace(/cos\(/g,'Math.cos(').replace(/tan\(/g,'Math.tan(').replace(/log\(/g,'Math.log10(').replace(/ln\(/g,'Math.log(');
     const r=parseFloat(Function('"use strict";return('+e+')')().toPrecision(10));
     document.getElementById('c-res').textContent=r; ce=String(r); cd();

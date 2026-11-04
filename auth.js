@@ -101,7 +101,7 @@ async function saveScoreHistory(record) {
     const list = JSON.parse(localStorage.getItem(key) || '[]');
     record.id = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
     // Logged in but the save failed: keep it here and upload it next time the results page reaches the server.
-    if (token) record.pendingSync = true;
+    if (token) record.pendingSync = authGetEmail() || true; // the account it belongs to
     record.date = new Date().toISOString();
     list.unshift(record);
     if (list.length > 300) list.length = 300;
