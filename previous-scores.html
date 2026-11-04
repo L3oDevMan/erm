@@ -130,7 +130,7 @@
     }
   </style>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="theme.css?v=4" />
+  <link rel="stylesheet" href="theme.css?v=5" />
   <script src="sidebar.js?v=8"></script>
 </head>
 <body>
@@ -242,6 +242,7 @@
     if (token) {
       const email = await authVerifySession();
       if (email) {
+        await uploadPending(token);
         let fromServer = null;
         try {
           const res = await fetch(`${AUTH_API_BASE}/api/my-results`, {
@@ -251,7 +252,7 @@
         } catch (e) {}
         if (Array.isArray(fromServer)) {
           isAccountMode = true;
-          history = fromServer;
+          history = normalize(fromServer);
           history.sort((a, b) => new Date(b.date) - new Date(a.date));
           showSyncStatus(email);
           return;
@@ -259,7 +260,7 @@
         // Server unreachable: show what's saved on this device (scores taken while offline are kept here)
         // instead of an empty list.
         isAccountMode = false;
-        try { history = JSON.parse(localStorage.getItem(HKEY) || '[]'); } catch (e) { history = []; }
+        try { history = normalize(JSON.parse(localStorage.getItem(HKEY) || '[]')); } catch (e) { history = []; }
         history.sort((a, b) => new Date(b.date) - new Date(a.date));
         const el = document.getElementById('sync-status');
         if (el) el.innerHTML = `Signed in as <strong>${escH(email)}</strong>, but the results server can’t be reached right now — showing results saved on this device.`;
@@ -268,10 +269,42 @@
     }
     // Guest / not logged in — same as before
     isAccountMode = false;
-    try { history = JSON.parse(localStorage.getItem(HKEY) || '[]'); }
+    try { history = normalize(JSON.parse(localStorage.getItem(HKEY) || '[]')); }
     catch (e) { history = []; }
     history.sort((a, b) => new Date(b.date) - new Date(a.date));
     showSyncStatus(null);
+  }
+
+  // Results saved on this device while the server was unreachable (marked pendingSync by auth.js):
+  // send them to the account now, and drop the local copy once the server has them.
+  async function uploadPending(token) {
+    let list;
+    try { list = JSON.parse(localStorage.getItem(HKEY) || '[]'); } catch (e) { return; }
+    if (!Array.isArray(list)) return;
+    const done = new Set();
+    for (const r of list.filter(x => x && x.pendingSync)) {
+      try {
+        const { pendingSync, id, ...rec } = r;
+        const res = await fetch(`${AUTH_API_BASE}/api/save-result`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify(rec)
+        });
+        if (res.ok) done.add(r.id);
+      } catch (e) { break; }
+    }
+    if (done.size) { try { localStorage.setItem(HKEY, JSON.stringify(list.filter(x => !done.has(x.id)))); } catch (e) {} }
+  }
+
+  // Old or partial records shouldn't break the list: give every entry an id and the fields the page reads.
+  function normalize(list) {
+    if (!Array.isArray(list)) return [];
+    return list.filter(r => r && typeof r === 'object').map((r, i) => {
+      if (r.id == null || r.id === '') r.id = 'r' + i + '-' + String(r.date || '');
+      if (r.type === 'fulltest' && (!r.fulltest || typeof r.fulltest !== 'object')) r.fulltest = { total: '—', rw: '—', math: '—' };
+      if (!r.stats || typeof r.stats !== 'object') r.stats = { correct: r.correct ?? '—', incorrect: '—', unanswered: '—' };
+      return r;
+    });
   }
 
   function showSyncStatus(email) {
@@ -349,11 +382,12 @@
     if (!confirm(`Delete ${ids.length} result${ids.length===1?'':'s'}? This can't be undone.`)) return;
     if (isAccountMode) {
       try {
-        await fetch(`${AUTH_API_BASE}/api/delete-result`, {
+        const res = await fetch(`${AUTH_API_BASE}/api/delete-result`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authGetToken()}` },
           body: JSON.stringify({ ids })
         });
+        if (!res.ok) throw new Error('delete failed');
       } catch (e) { alert("Couldn't delete — check your connection and try again."); return; }
     }
     history = history.filter(r => !ids.includes(r.id));
@@ -434,11 +468,12 @@
     if (!confirm("Delete this result? This can't be undone.")) return;
     if (isAccountMode) {
       try {
-        await fetch(`${AUTH_API_BASE}/api/delete-result`, {
+        const res = await fetch(`${AUTH_API_BASE}/api/delete-result`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authGetToken()}` },
           body: JSON.stringify({ ids: [curId] })
         });
+        if (!res.ok) throw new Error('delete failed');
       } catch (e) { alert("Couldn't delete — check your connection and try again."); return; }
     }
     history = history.filter(r => r.id !== curId);
