@@ -102,6 +102,10 @@
     /* TOOL PANE */
     .tool-pane { width: 420px; flex-shrink: 0; border-left: 1px solid var(--gray-border); display: flex; flex-direction: column; overflow: hidden; transition: width 0.2s ease; }
     .tool-pane.closed { width: 0; border-left: none; }
+    /* Phones: the calculator / Desmos opens as a full-width panel over the question instead of squeezing it. */
+    @media (max-width: 720px) {
+      .tool-pane:not(.closed) { position: fixed; top: 52px; bottom: 56px; left: 0; right: 0; width: auto; z-index: 300; background: var(--white); border-left: none; }
+    }
     .tool-tabs { display: flex; border-bottom: 1px solid var(--gray-border); background: var(--gray-bg); flex-shrink: 0; }
     .ttab { flex: 1; padding: 10px 0; text-align: center; font-size: 12px; font-family: 'DM Mono', monospace; letter-spacing: .06em; text-transform: uppercase; color: var(--gray-mid); cursor: pointer; border-bottom: 2px solid transparent; transition: color .15s, border-color .15s; }
     .ttab.on { color: var(--black); border-bottom-color: var(--black); background: var(--white); }
@@ -504,8 +508,8 @@ function renderQ(i) {
     const val = frInputs[i] || '';
     if (submitted) {
       const correct = q.answer_raw ? checkFR(val, q.answer_raw) : false;
-      const clsInp  = !val ? '' : correct ? ' correct' : ' wrong';
-      const resHtml = !val
+      const clsInp  = !val.trim() ? '' : correct ? ' correct' : ' wrong';
+      const resHtml = !val.trim()
         ? `<div class="fr-result bad">Unanswered — correct answer: <strong>${q.answer_raw||'N/A'}</strong></div>`
         : correct
           ? `<div class="fr-result ok">✓ Correct</div>`
@@ -559,32 +563,41 @@ function escH(s) {
   return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// Check free response — supports decimals, fractions, equivalent forms,
-// several accepted answers ("11/4, 2.75") and the "−" minus sign
+// Check free response like the SAT answer box: plain numbers or fractions, several accepted
+// answers ("11/4, 2.75"), the "−" minus sign, and decimals that fill the box may be rounded or cut off
 function checkFR(input, correct) {
   if (!input || !correct) return false;
-  const norm = s => String(s).trim().toLowerCase().replace(/[\u2212\u2013\u2014]/g,'-').replace(/\s+/g,'');
+  const norm = s => String(s).trim().toLowerCase().replace(/[−–—]/g, '-').replace(/\s+/g, '');
+  // Only plain numbers and fractions count, like the SAT answer box: 7, -0.5, .25, 11/4
+  const NUM = /^-?(\d+\.?\d*|\.\d+)(\/(\d+\.?\d*|\.\d+))?$/;
   const toNum = s => {
-    if (s.includes('/')) {
-      const parts = s.split('/');
-      return parts.length === 2 ? parseFloat(parts[0]) / parseFloat(parts[1]) : NaN;
-    }
-    return parseFloat(s);
+    if (!NUM.test(s)) return NaN;
+    const [n, d] = s.split('/');
+    return d === undefined ? Number(n) : Number(n) / Number(d);
   };
-  const a = norm(input);
-  const va = toNum(a);
+  const a = norm(input), va = toNum(a);
+  const dec = /^-?\d*\.(\d+)$/.exec(a);
   return String(correct).split(',').some(acc => {
     const b = norm(acc);
     if (!b) return false;
     if (a === b) return true;
     const vb = toNum(b);
-    return isFinite(va) && isFinite(vb) && Math.abs(va - vb) < 0.0001;
+    if (!isFinite(va) || !isFinite(vb)) return false;
+    if (Math.abs(va - vb) < 1e-9) return true;
+    // A decimal that fills the answer box (5 characters, not counting a minus sign)
+    // may be the answer rounded or cut off at its last digit, as the SAT allows.
+    if (dec && a.replace('-', '').length >= 5) {
+      const f = Math.pow(10, dec[1].length);
+      return Math.abs(va - Math.round(vb * f) / f) < 1e-9 || Math.abs(va - Math.trunc(vb * f) / f) < 1e-9;
+    }
+    return false;
   });
 }
 
 // ── Review ─────────────────────────────────────────────────────
 function openReview() {
   saveFrInput();
+  if (submitted) { openO('score-o'); return; } // already graded: show the results, don't offer a second submit
   const ua = QS.filter((q,i) => q.is_mc ? answers[i]===null : frInputs[i].trim()==='').length;
   const fl = flagged.filter(Boolean).length;
   document.getElementById('rev-sub').textContent = `${ua} unanswered · ${fl} flagged`;
@@ -592,7 +605,7 @@ function openReview() {
   document.getElementById('rev-list').innerHTML = QS.map((q,i) => {
     let st, stCls;
     if (q.is_mc) { st = answers[i]===null ? 'Not answered' : `Answer ${letters[answers[i]]}`; }
-    else { st = frInputs[i].trim()==='' ? 'Not answered' : `"${frInputs[i].trim().slice(0,12)}"` ; }
+    else { st = frInputs[i].trim()==='' ? 'Not answered' : `"${escH(frInputs[i].trim().slice(0,12))}"` ; }
     const fl = flagged[i] ? ' <span style="color:#c0392b;font-size:11px">★</span>':''
     const frBadge = q.is_mc ? '' : ' <span style="font-size:10px;color:var(--gray-mid)">[FR]</span>';
     return `<div class="rev-item" onclick="closeO('rev-o');goTo(${i})">
@@ -610,6 +623,7 @@ function openReview() {
 
 // ── Submit ─────────────────────────────────────────────────────
 async function submitTest() {
+  if (submitted) return; // a module is graded and saved once
   saveFrInput();
   submitted = true; clearInterval(timerTick);
   const total = QS.length;

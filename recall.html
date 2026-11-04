@@ -176,7 +176,12 @@ let timer = null, secsLeft = 0;
 
 function loadPrefs() {
   const d = { secs: 60, mode: 'both' };
-  try { return Object.assign(d, JSON.parse(localStorage.getItem('sat-recall-prefs') || '{}')); } catch (e) { return d; }
+  let saved = {};
+  try { saved = JSON.parse(localStorage.getItem('sat-recall-prefs') || '{}') || {}; } catch (e) {}
+  // only accept values the start screen offers (a bad value would freeze the timer)
+  if ([30, 45, 60, 90, 120].includes(saved.secs)) d.secs = saved.secs;
+  if (['both', 'write', 'mc'].includes(saved.mode)) d.mode = saved.mode;
+  return d;
 }
 function savePrefs() { try { localStorage.setItem('sat-recall-prefs', JSON.stringify(prefs)); } catch (e) {} }
 const writes = () => prefs.mode !== 'mc';
@@ -380,7 +385,7 @@ function exitRecall(noConfirm) {
 //    the whole question bank, so everyday words (found, group, possible…)
 //    never count. ─────────────────────────────────────────────────────
 const STOP = new Set(('about above after again against also although among another because been before being below between both but could did does doing down during each even every from further have having here however into itself just like made make many more most much must never only other over same should since some such than that their them themselves then there these they this those through thus under until upon very were what when where which while whom whose will with within without would your yours text texts author authors following adapted the and for are was not one two its has had who how all any can may way often still yet less least among new old ever being').split(' '));
-function wordsOf(s) { return String(s || '').match(/[A-Za-zÀ-ÿ][A-Za-zÀ-ÿ'’-]*/g) || []; }
+function wordsOf(s) { return String(s || '').match(/\p{L}[\p{L}'’-]*/gu) || []; } // any alphabet: Čapek, Pūnana
 function norm(w) {
   w = w.toLowerCase().replace(/['’]s$/, '').replace(/['’]/g, '');
   if (w.length > 5) w = w.replace(/(ing|ed|es|s|ly)$/, '');
@@ -415,8 +420,13 @@ function keywordsOf(text) {
     .sort((a, b) => b.score - a.score);
   return ranked.slice(0, Math.max(6, Math.min(10, Math.round(tf.size * 0.22))));
 }
-// Same word, allowing other forms of it (fossil / fossilized, pigment / pigments).
-function sameWord(a, b) { return a === b || (a.length >= 5 && b.length >= 5 && a.slice(0, 5) === b.slice(0, 5)); }
+// Same word, allowing longer forms of it (fossil / fossilized) but not words that only
+// share a start (photograph / photosynthesis).
+function sameWord(a, b) {
+  if (a === b) return true;
+  const [s, l] = a.length <= b.length ? [a, b] : [b, a];
+  return s.length >= 5 && l.startsWith(s);
+}
 function markKeywords(root, marks) {
   if (!root || !marks) return;
   const kind = p => {
@@ -429,7 +439,7 @@ function markKeywords(root, marks) {
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
   const nodes = []; while (walker.nextNode()) nodes.push(walker.currentNode);
   nodes.forEach(node => {
-    const parts = node.nodeValue.split(/([A-Za-zÀ-ÿ][A-Za-zÀ-ÿ'’-]*)/);
+    const parts = node.nodeValue.split(/(\p{L}[\p{L}'’-]*)/u);
     if (!parts.some((p, i) => i % 2 && kind(p))) return;
     const frag = document.createDocumentFragment();
     parts.forEach((p, i) => {

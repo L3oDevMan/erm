@@ -642,7 +642,15 @@
     </div>`;
   }).join('');
 
-  function show(id) {
+  // Sections that have their own address (index.html#math …), so Back, reload and links work.
+  const ROUTES = ['math','english','fulltests','adaptive','drills','recall','hard','recycles'];
+  function show(id, fromHistory) {
+    if (!fromHistory) {
+      // sub-pages (a test's modules, a drill's sets) sit under their section's address
+      const route = ROUTES.includes(id) ? id : ({ modules: curSubj, drillmods: 'drills' })[id] || '';
+      const url = route ? '#' + route : location.pathname + location.search;
+      if (id !== 'home' || location.hash) window.history.pushState({ page: id }, '', url);
+    }
     document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
     document.getElementById(id).classList.add('active');
     const navId = ({modules:curSubj, drillmods:'drills'})[id] || id;
@@ -893,7 +901,13 @@
   }
   updateCountdown();
   setInterval(updateCountdown, 1000);
-  { const h = location.hash.slice(1); if (['math','english','fulltests','adaptive','drills','recall','hard','recycles'].includes(h)) show(h); }
+  // Back / Forward (or editing the #address): show that section. A sub-page entry shows its section.
+  function routeFromUrl() {
+    const h = location.hash.slice(1);
+    show(ROUTES.includes(h) ? h : 'home', true);
+  }
+  window.addEventListener('popstate', routeFromUrl);
+  { const h = location.hash.slice(1); if (ROUTES.includes(h)) show(h, true); }
 </script>
 
 <div class="reco-popup" id="reco-popup">
@@ -918,7 +932,13 @@
 
   // Same domain-label variants used elsewhere on the site for the
   // same underlying category, mapped onto DRILL_TOPICS' domain names.
-  const RECO_DOMAIN_ALIAS = { 'Standard English': 'Standard English Conventions' };
+  // Saved results use short domain names; the drill list uses the full ones.
+  const RECO_DOMAIN_ALIAS = {
+    'Standard English': 'Standard English Conventions',
+    'Information & Ideas': 'Information and Ideas',
+    'Craft & Structure': 'Craft and Structure',
+    'Expression of Ideas': 'Expression of Ideas',
+  };
 
   function recoIsDismissed() {
     try {
@@ -946,9 +966,10 @@
       if (!Array.isArray(arr)) return;
       for (const d of arr) {
         if (!d || !d.name) continue;
-        if (!domainAgg[d.name]) domainAgg[d.name] = { name: d.name, correct: 0, total: 0 };
-        domainAgg[d.name].correct += d.correct || 0;
-        domainAgg[d.name].total += d.total || 0;
+        const name = RECO_DOMAIN_ALIAS[d.name] || d.name; // one bucket per domain, whatever the page called it
+        if (!domainAgg[name]) domainAgg[name] = { name, correct: 0, total: 0 };
+        domainAgg[name].correct += d.correct || 0;
+        domainAgg[name].total += d.total || 0;
       }
     }
     for (const rec of history) {

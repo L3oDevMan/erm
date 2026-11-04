@@ -1294,7 +1294,8 @@ function updateTimerDisplayEng(key) {
 }
 function toggleTimerEng() {
   timerHidden = !timerHidden;
-  document.getElementById('eng-timer-toggle').textContent = timerHidden ? 'Show' : 'Hide';
+  // one setting for the whole test: keep both sections' buttons in step
+  ['eng-timer-toggle', 'math-timer-toggle'].forEach(id => document.getElementById(id).textContent = timerHidden ? 'Show' : 'Hide');
   updateTimerDisplayEng(getCurrentSectionKey());
 }
 
@@ -1328,6 +1329,7 @@ function goToQuestionEng(key, i) {
   currentQ = i;
   renderQuestionEng(key, i);
   updateNavEng(key);
+  ['#english-ui .test-body', '#passage-pane', '#question-pane'].forEach(sel => { const el = document.querySelector(sel); if (el) el.scrollTop = 0; });
 }
 function prevQuestionEng() {
   if (currentQ > 0) goToQuestionEng(getCurrentSectionKey(), currentQ - 1);
@@ -1472,10 +1474,12 @@ function renderQuestionEng(key, i) {
       const endIdx = idx + segNorm.length;
       let charCount = 0, inT = false, startHtmlPos = -1, endHtmlPos = -1;
       for (let i = 0; i < htmlStr.length; i++) {
+        // Check the end before skipping a tag: a segment that ends right before a tag must
+        // close there, or the browser carries the open <u> over the rest of the passage.
+        if (charCount === endIdx && endHtmlPos === -1 && startHtmlPos !== -1) { endHtmlPos = i; break; }
         if (htmlStr[i] === '<') inT = true;
         if (!inT) {
           if (charCount === idx && startHtmlPos === -1) startHtmlPos = i;
-          if (charCount === endIdx && endHtmlPos === -1) { endHtmlPos = i; break; }
           charCount++;
         }
         if (htmlStr[i] === '>') inT = false;
@@ -1553,7 +1557,8 @@ function selectAnswerEng(key, qi, ci) {
   if (sd.submitted) return;
   sd.answers[qi] = ci;
   updateNavEng(key);
-  renderQuestionEng(key, qi);
+  // Update the choices in place so passage highlights stay exactly where they are.
+  document.querySelectorAll('#question-pane .answer-option').forEach((el, k) => el.classList.toggle('selected', k === ci));
 }
 function toggleFlagEng(key, qi) {
   sectionData[key].flagged[qi] = document.getElementById('flag-cb').checked;
@@ -1868,7 +1873,8 @@ function updateTimerDisplayMath(key) {
 }
 function toggleTimerMath() {
   timerHidden = !timerHidden;
-  document.getElementById('math-timer-toggle').textContent = timerHidden ? 'Show' : 'Hide';
+  // one setting for the whole test: keep both sections' buttons in step
+  ['eng-timer-toggle', 'math-timer-toggle'].forEach(id => document.getElementById(id).textContent = timerHidden ? 'Show' : 'Hide');
   updateTimerDisplayMath(getCurrentSectionKey());
 }
 
@@ -1951,8 +1957,8 @@ function renderQuestionMath(key, i) {
     const val = sd.frInputs[i] || '';
     if (submitted) {
       const correct = q.answer_raw ? checkFR(val, q.answer_raw) : false;
-      const clsInp = !val ? '' : correct ? ' correct' : ' wrong';
-      const resHtml = !val
+      const clsInp = !val.trim() ? '' : correct ? ' correct' : ' wrong';
+      const resHtml = !val.trim()
         ? `<div class="fr-result bad">Unanswered — correct answer: <strong>${q.answer_raw||'N/A'}</strong></div>`
         : correct
           ? `<div class="fr-result ok">✓ Correct</div>`
@@ -2004,26 +2010,34 @@ function selMC(key, qi, li) {
   renderQuestionMath(key, qi);
 }
 
-// Check free response — supports decimals, fractions, equivalent forms,
-// several accepted answers ("11/4, 2.75") and the "−" minus sign
+// Check free response like the SAT answer box: plain numbers or fractions, several accepted
+// answers ("11/4, 2.75"), the "−" minus sign, and decimals that fill the box may be rounded or cut off
 function checkFR(input, correct) {
   if (!input || !correct) return false;
-  const norm = s => String(s).trim().toLowerCase().replace(/[\u2212\u2013\u2014]/g,'-').replace(/\s+/g,'');
+  const norm = s => String(s).trim().toLowerCase().replace(/[−–—]/g, '-').replace(/\s+/g, '');
+  // Only plain numbers and fractions count, like the SAT answer box: 7, -0.5, .25, 11/4
+  const NUM = /^-?(\d+\.?\d*|\.\d+)(\/(\d+\.?\d*|\.\d+))?$/;
   const toNum = s => {
-    if (s.includes('/')) {
-      const parts = s.split('/');
-      return parts.length === 2 ? parseFloat(parts[0]) / parseFloat(parts[1]) : NaN;
-    }
-    return parseFloat(s);
+    if (!NUM.test(s)) return NaN;
+    const [n, d] = s.split('/');
+    return d === undefined ? Number(n) : Number(n) / Number(d);
   };
-  const a = norm(input);
-  const va = toNum(a);
+  const a = norm(input), va = toNum(a);
+  const dec = /^-?\d*\.(\d+)$/.exec(a);
   return String(correct).split(',').some(acc => {
     const b = norm(acc);
     if (!b) return false;
     if (a === b) return true;
     const vb = toNum(b);
-    return isFinite(va) && isFinite(vb) && Math.abs(va - vb) < 0.0001;
+    if (!isFinite(va) || !isFinite(vb)) return false;
+    if (Math.abs(va - vb) < 1e-9) return true;
+    // A decimal that fills the answer box (5 characters, not counting a minus sign)
+    // may be the answer rounded or cut off at its last digit, as the SAT allows.
+    if (dec && a.replace('-', '').length >= 5) {
+      const f = Math.pow(10, dec[1].length);
+      return Math.abs(va - Math.round(vb * f) / f) < 1e-9 || Math.abs(va - Math.trunc(vb * f) / f) < 1e-9;
+    }
+    return false;
   });
 }
 
@@ -2038,7 +2052,7 @@ function openReviewMath() {
   document.getElementById('math-review-list').innerHTML = sd.questions.map((q,i) => {
     let st;
     if (q.is_mc) st = sd.answers[i]===null ? 'Not answered' : `Answer ${letters[sd.answers[i]]}`;
-    else st = sd.frInputs[i].trim()==='' ? 'Not answered' : `"${sd.frInputs[i].trim().slice(0,12)}"`;
+    else st = sd.frInputs[i].trim()==='' ? 'Not answered' : `"${escHtml(sd.frInputs[i].trim().slice(0,12))}"`;
     const fl = sd.flagged[i] ? ' <span style="color:#c0392b;font-size:11px">★</span>':'';
     const frBadge = q.is_mc ? '' : ' <span style="font-size:10px;color:var(--gray-mid)">[FR]</span>';
     return `<div class="review-item" onclick="closeOverlay('math-review-overlay');goToQuestionMath('${key}',${i})">
@@ -2074,9 +2088,9 @@ function submitMathModule() {
 let calcExpr = '';
 function cn(d) { calcExpr += d; updateCalcDisplay(); }
 function cf(f) { calcExpr += f; updateCalcDisplay(); }
-function cBk() { calcExpr = calcExpr.slice(0,-1); updateCalcDisplay(); }
+function cBk() { calcExpr = calcExpr.endsWith('**') ? calcExpr.slice(0,-2) : calcExpr.endsWith('Math.PI') ? calcExpr.slice(0,-7) : calcExpr.slice(0,-1); updateCalcDisplay(); }
 function cClr() { calcExpr = ''; document.getElementById('c-res').textContent = '0'; updateCalcDisplay(); }
-function updateCalcDisplay() { document.getElementById('c-expr').textContent = calcExpr; }
+function updateCalcDisplay() { document.getElementById('c-expr').textContent = calcExpr.replace(/\*\*/g,'^').replace(/Math\.PI/g,'π'); }
 function cEval() {
   try {
     const sanitized = calcExpr.replace(/sqrt\(/g, 'Math.sqrt(').replace(/sin\(/g,'Math.sin(')
