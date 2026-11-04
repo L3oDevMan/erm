@@ -332,7 +332,6 @@
 
 <script src="https://www.desmos.com/api/v1.10/calculator.js?apiKey=dcb31709b452b1cf9dc26972add0fda6"></script>
 <script src="math_modules.js"></script>
-<script src="math_images.js"></script>
 <script src="math_explain.js"></script>
 <script src="hardbank.js"></script>
 <script>
@@ -351,8 +350,8 @@ let timerSecs = 35*60, timerHidden = false, timerTick = null;
 let activeTool = null, desmosCalc = null;
 
 window.addEventListener('load', () => {
-  if (typeof MATH_MODULES === 'undefined' || typeof MATH_IMAGES === 'undefined') {
-    document.getElementById('load-lbl').textContent = 'Error: math_modules.js or math_images.js missing.';
+  if (typeof MATH_MODULES === 'undefined') {
+    document.getElementById('load-lbl').textContent = 'Error: math_modules.js is missing.';
     return;
   }
   QS = (HARD_MODE && window.HardBank) ? HardBank.mathSet(parseInt(modId, 10), P.get('skill') || '') : MATH_MODULES[modKey];
@@ -361,14 +360,8 @@ window.addEventListener('load', () => {
     return;
   }
 
-  // ── Diagnostic: check every question's page key exists in MATH_IMAGES ──
-  const missingImgs = QS.filter(q => !MATH_IMAGES[String(q.page)]);
-  if (missingImgs.length) {
-    console.warn(`[math.html] ${missingImgs.length}/${QS.length} questions in "${modKey}" have no matching image in MATH_IMAGES.`);
-    console.warn('Missing pages:', missingImgs.map(q => q.page));
-    console.warn('Sample MATH_IMAGES keys:', Object.keys(MATH_IMAGES).slice(0, 10));
-    console.warn('If your keys look offset by 1 (e.g. images use 0-based paging), that is the bug — regenerate math_images.js with 1-based PDF page numbers matching math_modules.js.');
-  }
+  // Each question image is its own file (math_img/<page>.jpg); fetch this module's ones now so they're ready.
+  QS.forEach(q => { if (q.page != null) new Image().src = mathImgSrc(q); });
 
   answers   = new Array(QS.length).fill(null);
   flagged   = new Array(QS.length).fill(false);
@@ -498,11 +491,13 @@ function saveFrInput() {
   if (inp) frInputs[cur] = inp.value;
 }
 
+// Question images live in math_img/, one file per page number.
+function mathImgSrc(q) { return q && q.page != null ? `math_img/${q.page}.jpg` : ''; }
+
 // ── Render ─────────────────────────────────────────────────────
 function renderQ(i) {
   const q = QS[i];
-  const imgSrc = MATH_IMAGES[String(q.page)]
-    ? `data:image/jpeg;base64,${MATH_IMAGES[String(q.page)]}` : '';
+  const imgSrc = mathImgSrc(q);
   const diffCls = {Easy:'d-easy',Medium:'d-med',Hard:'d-hard'}[q.difficulty]||'';
 
   // Build answer section
@@ -564,8 +559,8 @@ function renderQ(i) {
       ${q.is_mc?'':`<span style="font-size:10px;color:var(--gray-mid);border:1px solid var(--gray-border);border-radius:2px;padding:2px 7px;font-family:'DM Mono',monospace">Free Response</span>`}
     </div>
     <div class="q-num">Question ${i+1} of ${QS.length}</div>
-    ${q.question ? `<div class="q-text-block" style="font-size:16px;line-height:1.6;padding:1rem 1.25rem;border:1px solid var(--gray-border);border-radius:4px;background:var(--white)">${escH(q.question)}</div>` : imgSrc?`<div class="q-img-wrap"><img src="${imgSrc}" alt="Q${i+1}" onerror="this.parentElement.innerHTML='<div style=&quot;padding:1rem;color:var(--incorrect);font-size:13px&quot;>Image failed to load for page ${q.page} (question ${q.id}). Check that math_images.js has a key &quot;${q.page}&quot;.</div>'"/></div>`
-            :`<div style="padding:1rem;color:var(--gray-mid);font-size:13px">No image found for page ${q.page} (question ${q.id}). Check that math_images.js has a key "${q.page}".</div>`}
+    ${q.question ? `<div class="q-text-block" style="font-size:16px;line-height:1.6;padding:1rem 1.25rem;border:1px solid var(--gray-border);border-radius:4px;background:var(--white)">${escH(q.question)}</div>` : imgSrc?`<div class="q-img-wrap"><img src="${imgSrc}" alt="Q${i+1}" onerror="this.parentElement.innerHTML='<div style=&quot;padding:1rem;color:var(--incorrect);font-size:13px&quot;>Image failed to load for page ${q.page} (question ${q.id}). Check your connection and reload the page.</div>'"/></div>`
+            :`<div style="padding:1rem;color:var(--gray-mid);font-size:13px">No image for question ${q.id}.</div>`}
     ${ansHtml}
     ${submitted && window.mathExplainHTML ? mathExplainHTML(q, escH) : ''}
     <label class="flag-row">

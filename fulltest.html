@@ -762,7 +762,6 @@
 <script src="https://www.desmos.com/api/v1.10/calculator.js?apiKey=dcb31709b452b1cf9dc26972add0fda6"></script>
 <script src="questionbank.js"></script>
 <script src="math_modules.js"></script>
-<script src="math_images.js"></script>
 <script src="math_explain.js"></script>
 <script>
 // ══════════════════════════════════════════════════════════════
@@ -1029,18 +1028,13 @@ function initFullTest() {
     sectionData.math2.questions = buildMathModule(rng, usedMathIds, DIFFICULTY_MIX.routing);
   }
 
-  // ── Diagnostic: check every math question's page key exists in MATH_IMAGES ──
-  if (typeof MATH_IMAGES !== 'undefined') {
-    const allMathQs = [...sectionData.math1.questions, ...sectionData.math2.questions];
-    const missingImgs = allMathQs.filter(q => !MATH_IMAGES[String(q.page)]);
-    if (missingImgs.length) {
-      console.warn(`[fulltest.html] ${missingImgs.length}/${allMathQs.length} math questions have no matching image in MATH_IMAGES.`);
-      console.warn('Missing pages:', missingImgs.map(q => q.page));
-      console.warn('Sample MATH_IMAGES keys:', Object.keys(MATH_IMAGES).slice(0, 10));
-    }
-  } else {
-    console.warn('[fulltest.html] MATH_IMAGES is not defined — check that math_images.js is loaded.');
-  }
+  // Math images are one file each (math_img/<page>.jpg). Fetch this test's ones in the background
+  // (including both versions of an adaptive Module 2) so they're ready when the Math section starts.
+  setTimeout(() => {
+    const qs = [...sectionData.math1.questions, ...sectionData.math2.questions,
+      ...((module2Options.math && module2Options.math.harder) || []), ...((module2Options.math && module2Options.math.easier) || [])];
+    qs.forEach(q => { if (q && q.page != null) new Image().src = mathImgSrc(q); });
+  }, 3000);
 
   // Init per-section arrays
   ['eng1','eng2'].forEach(key => {
@@ -1930,12 +1924,14 @@ function saveFrInput(key) {
   if (el) sectionData[key].frInputs[currentQ] = el.value;
 }
 
+// Question images live in math_img/, one file per page number.
+function mathImgSrc(q) { return q && q.page != null ? `math_img/${q.page}.jpg` : ''; }
+
 function renderQuestionMath(key, i) {
   const sd = sectionData[key];
   const q = sd.questions[i];
   const submitted = sd.submitted;
-  const imgSrc = (typeof MATH_IMAGES !== 'undefined' && MATH_IMAGES[String(q.page)])
-    ? `data:image/jpeg;base64,${MATH_IMAGES[String(q.page)]}` : '';
+  const imgSrc = mathImgSrc(q);
   const diffCls = {Easy:'d-easy',Medium:'d-med',Hard:'d-hard'}[q.difficulty]||'';
 
   let ansHtml = '';
