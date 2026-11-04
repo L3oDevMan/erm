@@ -71,6 +71,12 @@
     .q-num { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--gray-mid); }
     .q-img-wrap { border: 1px solid var(--gray-border); border-radius: 4px; overflow-y: auto; overflow-x: hidden; background: var(--white); max-height: calc(100vh - 220px); }
     .q-img-wrap img { width: 100%; display: block; min-height: 0; }
+    /* Phones: less padding, and keep the question image readable — it scrolls sideways inside its box, not the page. */
+    @media (max-width: 720px) {
+      .q-pane { padding: 1rem; }
+      .q-img-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      .q-img-wrap img { min-width: 640px; }
+    }
 
     /* MC ANSWER BUTTONS */
     .mc-btns { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
@@ -93,6 +99,8 @@
     .fr-result { font-size: 13px; font-family: 'DM Mono', monospace; }
     .fr-result.ok  { color: var(--correct); }
     .fr-result.bad { color: var(--incorrect); }
+    .rationale-box { margin-top: 1.25rem; padding: 1rem; border: 1px solid var(--gray-border); border-radius: 4px; background: var(--gray-bg); font-size: 14px; color: var(--gray-dark); line-height: 1.6; white-space: pre-line; }
+    .rationale-label { font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gray-mid); margin-bottom: 0.5rem; }
 
     /* FLAG */
     .flag-row { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; width: fit-content; }
@@ -104,7 +112,7 @@
     .tool-pane.closed { width: 0; border-left: none; }
     /* Phones: the calculator / Desmos opens as a full-width panel over the question instead of squeezing it. */
     @media (max-width: 720px) {
-      .tool-pane:not(.closed) { position: fixed; top: 52px; bottom: 56px; left: 0; right: 0; width: auto; z-index: 300; background: var(--white); border-left: none; }
+      .tool-pane:not(.closed) { position: fixed; top: 60px; bottom: 60px; left: 0; right: 0; width: auto; z-index: 300; background: var(--white); border-left: none; }
     }
     .tool-tabs { display: flex; border-bottom: 1px solid var(--gray-border); background: var(--gray-bg); flex-shrink: 0; }
     .ttab { flex: 1; padding: 10px 0; text-align: center; font-size: 12px; font-family: 'DM Mono', monospace; letter-spacing: .06em; text-transform: uppercase; color: var(--gray-mid); cursor: pointer; border-bottom: 2px solid transparent; transition: color .15s, border-color .15s; }
@@ -178,7 +186,7 @@
     .ref-f { font-family: 'Roboto', sans-serif; font-size: 14px; line-height: 1.6; }
   </style>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="theme.css?v=4" />
+  <link rel="stylesheet" href="theme.css?v=5" />
 </head>
 <body>
 
@@ -325,6 +333,7 @@
 <script src="https://www.desmos.com/api/v1.10/calculator.js?apiKey=dcb31709b452b1cf9dc26972add0fda6"></script>
 <script src="math_modules.js"></script>
 <script src="math_images.js"></script>
+<script src="math_explain.js"></script>
 <script src="hardbank.js"></script>
 <script>
 const P = new URLSearchParams(location.search);
@@ -373,19 +382,24 @@ window.addEventListener('load', () => {
 });
 
 // ── Timer ──────────────────────────────────────────────────────
-let timerPaused = false;
+let timerPaused = false, timerDeadline = 0;
 
+// Count down to a deadline, not by ticks: background tabs and sleeping phones throttle timers.
 function startTimer() {
+  timerDeadline = Date.now() + timerSecs*1000;
   timerTick = setInterval(() => {
     if (submitted || timerPaused) return;
-    timerSecs--;
+    timerSecs = Math.max(0, Math.ceil((timerDeadline - Date.now())/1000));
     drawTimer();
     if (timerSecs <= 0) { clearInterval(timerTick); submitTest(); }
-  }, 1000);
+  }, 250);
 }
 function togglePause() {
   if (submitted) return;
+  if (!timerPaused) timerSecs = Math.max(0, Math.ceil((timerDeadline - Date.now())/1000));
+  else timerDeadline = Date.now() + timerSecs*1000; // resume: push the deadline back by the paused time
   timerPaused = !timerPaused;
+  drawTimer();
   document.getElementById('tpause').textContent = timerPaused ? 'Resume' : 'Pause';
   document.getElementById('timer').classList.toggle('paused', timerPaused);
 }
@@ -429,12 +443,16 @@ function initDesmos() {
 let ce = '';
 function cn(n) { ce+=n; cd(); }
 function cf(f) { ce+=f; cd(); }
-function cBk() { ce=ce.endsWith('**')?ce.slice(0,-2):ce.slice(0,-1); cd(); }
+// Backspace removes a whole inserted token (π, sqrt(, xʸ …), else one character.
+const C_TOKENS = ['Math.PI','sqrt(','sin(','cos(','tan(','log(','ln(','**'];
+function cBk() { const t=C_TOKENS.find(t=>ce.endsWith(t)); ce=ce.slice(0,-(t?t.length:1)); cd(); }
 function cClr() { ce=''; document.getElementById('c-res').textContent='0'; cd(); }
 function cd() { document.getElementById('c-expr').textContent=ce.replace(/\*\*/g,'^').replace(/Math\.PI/g,'π'); }
 function cEval() {
   try {
-    let e=ce.replace(/sqrt\(/g,'Math.sqrt(').replace(/sin\(/g,'Math.sin(').replace(/cos\(/g,'Math.cos(').replace(/tan\(/g,'Math.tan(').replace(/log\(/g,'Math.log10(').replace(/ln\(/g,'Math.log(');
+    // Unary minus becomes (-1)* so "-8^2" = -64 (JS rejects -8**2); right after ** JS already allows it.
+    let e=ce.replace(/(\*\*|^|[(*\/+\-])-/g,(m,p)=>p==='**'?m:p+'(-1)*');
+    e=e.replace(/sqrt\(/g,'Math.sqrt(').replace(/sin\(/g,'Math.sin(').replace(/cos\(/g,'Math.cos(').replace(/tan\(/g,'Math.tan(').replace(/log\(/g,'Math.log10(').replace(/ln\(/g,'Math.log(');
     const r=parseFloat(Function('"use strict";return('+e+')')().toPrecision(10));
     document.getElementById('c-res').textContent=r; ce=String(r); cd();
   } catch(e) { document.getElementById('c-res').textContent='Error'; }
@@ -463,6 +481,13 @@ function upNav() {
     if (hasAns) d.classList.add('ans');
     if (flagged[i]) d.classList.add('flag');
   });
+  // Keep the current dot visible in the sideways-scrolling nav (only the nav scrolls, never the page).
+  const nav = document.getElementById('q-nav'), curDot = document.getElementById(`dot-${cur}`);
+  if (nav && curDot) {
+    const nr = nav.getBoundingClientRect(), dr = curDot.getBoundingClientRect();
+    if (dr.left < nr.left) nav.scrollLeft -= nr.left - dr.left;
+    else if (dr.right > nr.right) nav.scrollLeft += dr.right - nr.right;
+  }
 }
 function goTo(i) { saveFrInput(); cur=i; renderQ(i); upNav(); }
 function prevQ() { if(cur>0) goTo(cur-1); }
@@ -522,7 +547,8 @@ function renderQ(i) {
     } else {
       ansHtml = `<div class="fr-wrap">
         <div class="fr-label">Enter your answer</div>
-        <input id="fr-inp" class="fr-input" type="text" inputmode="decimal"
+        <input id="fr-inp" class="fr-input" type="text" inputmode="text"
+          autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"
           value="${escH(val)}" placeholder="e.g. 3/2"
           oninput="frInputs[${i}]=this.value;upNav()"
           onkeydown="if(event.key==='Enter'&&${i}<QS.length-1)goTo(${i}+1)" />
@@ -541,6 +567,7 @@ function renderQ(i) {
     ${q.question ? `<div class="q-text-block" style="font-size:16px;line-height:1.6;padding:1rem 1.25rem;border:1px solid var(--gray-border);border-radius:4px;background:var(--white)">${escH(q.question)}</div>` : imgSrc?`<div class="q-img-wrap"><img src="${imgSrc}" alt="Q${i+1}" onerror="this.parentElement.innerHTML='<div style=&quot;padding:1rem;color:var(--incorrect);font-size:13px&quot;>Image failed to load for page ${q.page} (question ${q.id}). Check that math_images.js has a key &quot;${q.page}&quot;.</div>'"/></div>`
             :`<div style="padding:1rem;color:var(--gray-mid);font-size:13px">No image found for page ${q.page} (question ${q.id}). Check that math_images.js has a key "${q.page}".</div>`}
     ${ansHtml}
+    ${submitted && window.mathExplainHTML ? mathExplainHTML(q, escH) : ''}
     <label class="flag-row">
       <input type="checkbox" ${flagged[i]?'checked':''} onchange="flagged[${i}]=this.checked;upNav()">
       <span class="flag-lbl">Flag for review</span>
@@ -678,17 +705,18 @@ async function submitTest() {
     </div>`;
   }).join('');
 
-  await saveScoreHistory({
+  // Show the results first; saving runs in the background so a slow or hung server can't block them.
+  closeO('rev-o'); openO('score-o');
+  renderQ(cur);
+
+  Promise.resolve().then(() => saveScoreHistory({
     type: 'math', typeLabel: 'Math',
     title: `${testLabel} · ${modWord} ${modId}`,
     correct, total, pct,
     stats: { correct, incorrect, unanswered },
     breakdownLabel: 'Domain', breakdown: domainData,
     review: reviewData
-  });
-
-  closeO('rev-o'); openO('score-o');
-  renderQ(cur);
+  })).catch(e => console.warn('[math.html] score save failed', e));
 }
 
 function openO(id)  { document.getElementById(id).classList.add('open'); }

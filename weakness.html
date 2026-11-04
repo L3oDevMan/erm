@@ -75,7 +75,7 @@
     }
   </style>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="theme.css?v=4" />
+  <link rel="stylesheet" href="theme.css?v=5" />
   <script src="sidebar.js?v=8"></script>
 </head>
 <body>
@@ -172,6 +172,7 @@
       const res = await fetch(`${AUTH_API_BASE}/api/weakness-profile`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
+      if (!res.ok) throw new Error("profile " + res.status);
       data = await res.json();
     } catch (e) {
       document.getElementById('loading-view').innerHTML = '<div class="empty-state"><div class="big">Couldn\'t load your profile</div>Check your connection and reload the page.</div>';

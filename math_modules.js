@@ -1,8 +1,8 @@
 // math_modules.js — SAT Math question bank
 // Every question is one image in math_images.js (page = its image key). Answers, type, domain, skill and
 // difficulty were worked out from the image itself (Nov 2026 re-key: the old answer key did not match the
-// images). 15 tests × 4 modules of 21–22 questions; each module has 5 student-produced answers,
-// domain-balanced and ordered easy → hard.
+// images). 15 tests × 4 modules of 21–22 questions; each module has 5–6 student-produced answers,
+// domains spread as evenly as the bank allows (it has few Geometry questions), ordered easy → hard.
 // is_mc: true  → answer_idx 0-3 (A=0,B=1,C=2,D=3)
 // is_mc: false → answer_raw string (accepted answers, comma-separated)
 
@@ -1135,7 +1135,7 @@ const MATH_MODULES = {
     {id:"m1725",domain:"Geometry and Trigonometry",skill:"Area and volume",difficulty:"Easy",is_mc:true,answer_idx:0,answer_raw:null,page:1725},
     {id:"m0762",domain:"Advanced Math",skill:"Nonlinear equations in one variable and systems of equations in two variables",difficulty:"Medium",is_mc:false,answer_idx:null,answer_raw:"2, 8",page:762},
     {id:"m0115",domain:"Algebra",skill:"Linear inequalities in one or two variables",difficulty:"Medium",is_mc:true,answer_idx:3,answer_raw:null,page:115},
-    {id:"m0063",domain:"Algebra",skill:"Linear equations in one variable",difficulty:"Medium",is_mc:true,answer_idx:0,answer_raw:null,page:63},
+    {id:"m0063",domain:"Algebra",skill:"Linear equations in one variable",difficulty:"Medium",is_mc:true,answer_idx:3,answer_raw:null,page:63},
     {id:"m1004",domain:"Advanced Math",skill:"Equivalent expressions",difficulty:"Medium",is_mc:true,answer_idx:2,answer_raw:null,page:1004},
     {id:"m1359",domain:"Problem-Solving and Data Analysis",skill:"Ratios, rates, proportional relationships, and units",difficulty:"Medium",is_mc:true,answer_idx:1,answer_raw:null,page:1359},
     {id:"m1634",domain:"Geometry and Trigonometry",skill:"Area and volume",difficulty:"Medium",is_mc:false,answer_idx:null,answer_raw:"518.4, 2592/5",page:1634},
