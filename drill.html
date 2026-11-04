@@ -720,7 +720,7 @@ function renderQuestion(i) {
         } else if (l.type === 'chart') {
           flushText();
           if (l.image) {
-            parts.push(`<div class="passage-chart-wrap"><img class="passage-chart-img" src="${l.image}" alt="Chart or graph for this question" /></div>`);
+            parts.push(`<div class="passage-chart-wrap"><img class="passage-chart-img" src="${escHtml(l.image)}" alt="Chart or graph for this question" /></div>`);
           } else {
             parts.push(`<div class="passage-chart-note">${escHtml(l.note || '[Graph — see original source]')}</div>`);
           }
@@ -843,8 +843,8 @@ function renderQuestion(i) {
 
   pp.innerHTML = `
     <div class="passage-context">
-      <span>${q.domain || 'Reading and Writing'}</span>
-      <span class="passage-skill-tag">${q.skill || ''}</span>
+      <span>${escHtml(q.domain || 'Reading and Writing')}</span>
+      <span class="passage-skill-tag">${escHtml(q.skill || '')}</span>
       ${diffLabel ? `<span class="passage-difficulty ${diffClass}">${diffLabel}</span>` : ''}
     </div>
     <div class="passage-toolbar">

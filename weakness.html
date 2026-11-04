@@ -146,13 +146,13 @@
       return `<div class="domain-row">
         ${isFocus ? '<span class="domain-focus-badge">Focus</span>' : ''}
         <div class="domain-name">${escH(d.name)}</div>
-        <div class="bar-wrap"><div class="bar-fill ${barClass(d.pct)}" style="width:${d.pct}%"></div></div>
-        <div class="domain-sc">${d.correct}/${d.total} · ${d.pct}%</div>
+        <div class="bar-wrap"><div class="bar-fill ${barClass(d.pct)}" style="width:${Number(d.pct) || 0}%"></div></div>
+        <div class="domain-sc">${escH(d.correct)}/${escH(d.total)} · ${escH(d.pct)}%</div>
       </div>`;
     }).join('');
   }
 
-  function escH(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  function escH(s) { return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 
   async function load() {
     const token = authGetToken();

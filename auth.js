@@ -120,7 +120,7 @@ async function authRenderStatus() {
     return;
   }
   const cachedEmail = authGetEmail();
-  el.innerHTML = `<span style="font-size:13px;color:var(--gray-mid)">${cachedEmail || '...'}</span> <a href="#" onclick="authLogout();location.reload();return false;" style="font-size:13px;color:var(--gray-mid);text-decoration:underline;margin-left:8px;">Log out</a>`;
+  el.innerHTML = `<span style="font-size:13px;color:var(--gray-mid)">${String(cachedEmail || '...').replace(/[&<>"']/g, c => '&#' + c.charCodeAt(0) + ';')}</span> <a href="#" onclick="authLogout();location.reload();return false;" style="font-size:13px;color:var(--gray-mid);text-decoration:underline;margin-left:8px;">Log out</a>`;
   const email = await authVerifySession();
   if (!email) { el.innerHTML = `<a href="login.html" style="font-size:13px;color:var(--gray-mid);text-decoration:none;border:1px solid var(--gray-border);border-radius:6px;padding:6px 14px;">Log in</a>`; }
 }

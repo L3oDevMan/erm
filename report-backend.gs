@@ -29,10 +29,12 @@ function doPost(e) {
     var r = JSON.parse(e.postData.contents);
     // Keep abuse small: cap field lengths.
     var cut = function (s, n) { return String(s == null ? '' : s).slice(0, n); };
+    // A cell starting with = + - @ (or a tab/CR) would be run as a formula by Sheets: store it as plain text.
+    var safe = function (s, n) { var v = cut(s, n); return /^[=+\-@\t\r]/.test(v) ? "'" + v : v; };
     if (!cut(r.message, 2000).trim()) throw new Error('empty message');
     sheet_().appendRow([
-      new Date(), 'New', cut(r.page, 100), cut(r.module, 200), r.questionNumber || '', cut(r.questionId, 100),
-      cut(r.message, 2000), cut(r.url, 500), cut(r.userAgent, 300)
+      new Date(), 'New', safe(r.page, 100), safe(r.module, 200), safe(r.questionNumber, 20), safe(r.questionId, 100),
+      safe(r.message, 2000), safe(r.url, 500), safe(r.userAgent, 300)
     ]);
     return ContentService.createTextOutput(JSON.stringify({ ok: true })).setMimeType(ContentService.MimeType.JSON);
   } catch (err) {

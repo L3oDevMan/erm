@@ -359,18 +359,18 @@
     }
     empty.style.display = 'none';
     list.innerHTML = history.map(r => {
-      const scoreLabel = r.type === 'fulltest' ? `${r.fulltest.total}` : `${r.correct}/${r.total}`;
-      const pctLabel = r.type === 'fulltest' ? `RW ${r.fulltest.rw} · Math ${r.fulltest.math}` : `${r.pct}% correct`;
+      const scoreLabel = r.type === 'fulltest' ? escH(r.fulltest.total) : `${escH(r.correct)}/${escH(r.total)}`;
+      const pctLabel = r.type === 'fulltest' ? `RW ${escH(r.fulltest.rw)} · Math ${escH(r.fulltest.math)}` : `${escH(r.pct)}% correct`;
       return `<div class="hist-row">
-        <input type="checkbox" class="hist-check" data-id="${r.id}" onchange="updateDeleteBtn()" />
-        <div class="hist-main" onclick="openDetail('${r.id}')">
+        <input type="checkbox" class="hist-check" data-id="${escH(r.id)}" onchange="updateDeleteBtn()" />
+        <div class="hist-main" data-id="${escH(r.id)}" onclick="openDetail(this.dataset.id)">
           <div class="hist-top">
             <span class="hist-type">${escH(r.typeLabel)}</span>
             <span class="hist-title">${escH(r.title)}</span>
           </div>
           <span class="hist-date">${fmtDate(r.date)}</span>
         </div>
-        <div class="hist-right" onclick="openDetail('${r.id}')" style="cursor:pointer">
+        <div class="hist-right" data-id="${escH(r.id)}" onclick="openDetail(this.dataset.id)" style="cursor:pointer">
           <div class="hist-score"><div class="hist-score-num">${scoreLabel}</div><div class="hist-score-pct">${pctLabel}</div></div>
           <div class="hist-arrow">→</div>
         </div>
@@ -381,7 +381,7 @@
   }
 
   function escH(s) {
-    return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
   }
 
   function toggleSelectAll(checked) {
@@ -456,7 +456,7 @@
         const cls = q.status === 'correct' ? 'rd-ok' : q.status === 'incorrect' ? 'rd-bad' : 'rd-skip';
         const lbl = q.status === 'correct' ? 'Correct' : q.status === 'incorrect' ? 'Incorrect' : 'Unanswered';
         return `<div class="rev-item">
-          <div class="rev-num">${q.num}</div>
+          <div class="rev-num">${escH(q.num)}</div>
           <div class="rev-dot ${cls}"></div>
           <div style="flex:1;color:var(--black)">${escH(q.domain||'')}</div>
           <div style="font-size:12px;color:var(--gray-mid)">${lbl}</div>
@@ -469,15 +469,15 @@
     const pct = m.total ? Math.round(m.correct/m.total*100) : 0;
     return `<div class="module-result-card">
       <div class="module-result-name">${escH(m.name)}</div>
-      <div class="module-result-score">${m.correct}/${m.total}</div>
+      <div class="module-result-score">${escH(m.correct)}/${escH(m.total)}</div>
       <div class="module-result-detail">${pct}% correct</div>
     </div>`;
   }
   function breakdownRows(arr) {
     return (arr||[]).map(d => `<div class="dom-row">
       <div class="dom-name">${escH(d.name)}</div>
-      <div class="bar-wrap"><div class="bar-fill" style="width:${d.pct}%"></div></div>
-      <div class="dom-sc">${d.correct}/${d.total}</div>
+      <div class="bar-wrap"><div class="bar-fill" style="width:${Number(d.pct) || 0}%"></div></div>
+      <div class="dom-sc">${escH(d.correct)}/${escH(d.total)}</div>
     </div>`).join('');
   }
 
