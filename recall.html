@@ -145,7 +145,16 @@
 
 <main class="app" id="app"></main>
 
-<script src="drillbank.js"></script>
+<script>
+// Load only this set's passages plus the bank-wide word counts (built by tools/build_recall.js),
+// not the whole 4 MB drill bank. Written in during parsing so they load before the page script.
+(function () {
+  var P = new URLSearchParams(location.search);
+  var slug = (P.get('skill') || 'inferences').replace(/[^a-z-]/g, '');
+  var set = Math.max(1, parseInt(P.get('set'), 10) || 1);
+  document.write('<script src="recall/docfreq.js"><\/script><script src="recall/' + slug + '_' + set + '.js"><\/script>');
+})();
+</script>
 <script>
 // ══════════════════════════════════════════════════════════════
 //  ACTIVE RECALL — read a passage for a set time, it disappears,
@@ -190,8 +199,8 @@ const esc = s => String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'
 const $ = id => document.getElementById(id);
 
 window.addEventListener('load', () => {
-  if (typeof DRILL_BANK === 'undefined') { $('load-lbl').textContent = 'Couldn’t load the question bank. Check your connection and reload.'; return; }
-  QUESTIONS = (DRILL_BANK[`${skillSlug}_${setNum}`] || []).filter(q => !q.unusable); // skip questions whose graph was lost
+  if (typeof RECALL_DF === 'undefined') { $('load-lbl').textContent = 'Couldn’t load the question bank. Check your connection and reload.'; return; }
+  QUESTIONS = (window.RECALL_SET || []).filter(q => !q.unusable); // skip questions whose graph was lost
   if (!QUESTIONS.length) { $('load-lbl').textContent = `No questions found for ${skillName} · Set ${setNum}.`; return; }
   results = QUESTIONS.map(() => ({ recall: '', choice: null, rating: null, keyPct: null }));
   $('bar-module').textContent = `Active Recall · ${skillName} · Set ${setNum}`;
@@ -356,7 +365,7 @@ function showDone() {
   if (answers()) cards.push(`<div class="card"><b>${correct}/${n}</b><span>answered correctly from memory</span></div>`);
   if (writes()) cards.push(`<div class="card"><b>${avg === null ? '—' : avg + '%'}</b><span>of key words recalled, on average</span></div>`,
                            `<div class="card"><b>${most}/${n}</b><span>passages where you remembered most of it</span></div>`);
-  const hasNext = typeof DRILL_BANK !== 'undefined' && DRILL_BANK[`${skillSlug}_${setNum + 1}`];
+  const hasNext = typeof RECALL_SETS !== 'undefined' && (RECALL_SETS[skillSlug] || 0) > setNum;
   render(`
     <div class="eyebrow">Active Recall · Results</div>
     <div class="h1">${esc(skillName)} · Set ${setNum}</div>
@@ -395,12 +404,9 @@ const GENERIC = new Set(('produce produced producing examined examine found find
 let DOC_FREQ = null, DOC_COUNT = 0;
 function docFreq() {   // how many passages in the bank use each word (built once)
   if (DOC_FREQ) return DOC_FREQ;
-  DOC_FREQ = new Map();
-  const seen = new Set();
-  Object.values(typeof DRILL_BANK !== 'undefined' ? DRILL_BANK : {}).forEach(list => list.forEach(q => {
-    if (seen.has(q.id)) return; seen.add(q.id); DOC_COUNT++;
-    new Set(wordsOf(passageText(q)).map(norm)).forEach(n => DOC_FREQ.set(n, (DOC_FREQ.get(n) || 0) + 1));
-  }));
+  // Counted ahead of time over the whole drill bank by tools/build_recall.js (recall/docfreq.js).
+  DOC_FREQ = new Map(Object.entries(typeof RECALL_DF !== 'undefined' ? RECALL_DF : {}));
+  DOC_COUNT = typeof RECALL_DOC_COUNT !== 'undefined' ? RECALL_DOC_COUNT : 0;
   return DOC_FREQ;
 }
 function keywordsOf(text) {
