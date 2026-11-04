@@ -259,7 +259,7 @@
         <div class="card-tests-lbl">Practice tests</div>
         <div class="card-test-list">
           <div class="card-test-item">Practice Tests 1–15</div>
-          <div class="card-test-item">22 questions · 35 min per module</div>
+          <div class="card-test-item">21–22 questions · 35 min per module</div>
           <div class="card-test-item">MC + free response · Calculator + Desmos</div>
         </div>
       </div>
@@ -363,7 +363,7 @@
   <div class="subj-hero">
     <div class="subj-label">SAT · Mathematics</div>
     <div class="subj-title">Math</div>
-    <div class="subj-meta">Module 1 &amp; 2 · Algebra, Advanced Math, Problem-Solving &amp; Data Analysis, Geometry &amp; Trig · 22 questions · 35 min · MC + Free Response</div>
+    <div class="subj-meta">Module 1 &amp; 2 · Algebra, Advanced Math, Problem-Solving &amp; Data Analysis, Geometry &amp; Trig · 21–22 questions · 35 min · MC + Free Response</div>
   </div>
   <div class="tests-section">
     <div class="sec-label">Available practice tests</div>
@@ -591,7 +591,7 @@
 <script>
   let curSubj = 'math', curTestId = 'mathtest01', curLabel = 'Practice Test 1';
   const cfg = {
-    math:    { label:'SAT · Mathematics',         title:'Math',    q:22, min:35, file:'math.html',  chips:['Algebra','Advanced Math','PS & Data Analysis','Geometry & Trig'] },
+    math:    { label:'SAT · Mathematics',         title:'Math',    q:'21–22', min:35, file:'math.html',  chips:['Algebra','Advanced Math','PS & Data Analysis','Geometry & Trig'] },
     english: { label:'SAT · Reading and Writing',  title:'Writing', q:27, min:32, file:'test.html', chips:['Info & Ideas','Craft & Structure','Expression of Ideas','Standard English'] },
   };
 
@@ -600,7 +600,7 @@
     const n=i+1, id=`mathtest${String(n).padStart(2,'0')}`, name=`Practice Test ${n}`;
     return `<div class="test-row" onclick="showMods('math','${id}','${name}')">
       <div class="test-idx">${String(n).padStart(2,'0')}</div>
-      <div class="test-info"><div class="test-name">${name}</div><div class="test-detail">Module 1A, 1B, 2A, 2B · 22 questions each · 35 min · Multiple choice &amp; free response · Calculator &amp; Desmos</div></div>
+      <div class="test-info"><div class="test-name">${name}</div><div class="test-detail">Module 1A, 1B, 2A, 2B · 21–22 questions each · 35 min · Multiple choice &amp; free response · Calculator &amp; Desmos</div></div>
       <div class="test-right"><div class="badge badge-avail">Available</div><div class="test-arrow">→</div></div>
     </div>`;
   }).join('');
