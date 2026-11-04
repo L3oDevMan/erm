@@ -567,7 +567,7 @@ async function initTest() {
 
   if (!rawQuestions || rawQuestions.length === 0) {
     document.getElementById('loading-screen').innerHTML =
-      `<div style="font-family:'DM Mono',monospace;font-size:13px;color:#c0392b;">No questions found for ${HARD_MODE ? 'hard set ' + moduleId + (hardSkill ? ' (' + hardSkill + ')' : '') : RECYCLE_MODE ? 'recycles set ' + moduleId : 'module: ' + moduleKey}</div>`;
+      `<div style="font-family:'DM Mono',monospace;font-size:13px;color:#c0392b;">No questions found for ${escHtml(HARD_MODE ? 'hard set ' + moduleId + (hardSkill ? ' (' + hardSkill + ')' : '') : RECYCLE_MODE ? 'recycles set ' + moduleId : 'module: ' + moduleKey)}</div>`; // escaped: these come from the URL
     return;
   }
 
@@ -579,7 +579,8 @@ async function initTest() {
     const match = DOMAIN_ORDER.find(d => q.domain && q.domain.startsWith(d));
     if (match) _grouped[match].push(q);
   });
-  QUESTIONS = DOMAIN_ORDER.flatMap(d => _grouped[d]);
+  // Recycles sets keep their own order (most repeated first); everything else runs in domain order.
+  QUESTIONS = RECYCLE_MODE ? rawQuestions.slice() : DOMAIN_ORDER.flatMap(d => _grouped[d]);
 
   const totalQ = QUESTIONS.length;
   answers = new Array(totalQ).fill(null);
@@ -594,6 +595,7 @@ async function initTest() {
   document.getElementById('loading-screen').classList.add('hidden');
   buildNav();
   renderQuestion(0);
+  updateTimerDisplay(); // show the real time for this set right away (sets can be shorter than 32 min)
   startTimer();
 }
 
@@ -662,6 +664,8 @@ function goToQuestion(i) {
   currentQ = i;
   renderQuestion(i);
   updateNav();
+  // A new question starts at the top (on phones the passage and question share one scroll).
+  ['.test-body', '#passage-pane', '#question-pane'].forEach(sel => { const el = document.querySelector(sel); if (el) el.scrollTop = 0; });
 }
 
 function prevQuestion() {
@@ -825,10 +829,12 @@ function renderQuestion(i) {
       let charCount = 0, inT = false;
       let startHtmlPos = -1, endHtmlPos = -1;
       for (let i = 0; i < htmlStr.length; i++) {
+        // Check the end before skipping a tag: a segment that ends right before a tag must
+        // close there, or the browser carries the open <u> over the rest of the passage.
+        if (charCount === endIdx && endHtmlPos === -1 && startHtmlPos !== -1) { endHtmlPos = i; break; }
         if (htmlStr[i] === '<') { inT = true; }
         if (!inT) {
           if (charCount === idx && startHtmlPos === -1) startHtmlPos = i;
-          if (charCount === endIdx && endHtmlPos === -1) { endHtmlPos = i; break; }
           charCount++;
         }
         if (htmlStr[i] === '>') { inT = false; }
@@ -919,7 +925,9 @@ function selectAnswer(qi, ci) {
   if (submitted) return;
   answers[qi] = ci;
   updateNav();
-  renderQuestion(qi);
+  // Update the choices in place. Re-rendering the whole question would rebuild the passage
+  // and re-apply highlights by searching for their text, which can move or drop them.
+  document.querySelectorAll('#question-pane .answer-option').forEach((el, k) => el.classList.toggle('selected', k === ci));
 }
 
 function toggleFlag(qi) {
@@ -929,6 +937,7 @@ function toggleFlag(qi) {
 
 // ── Review Overlay ────────────────────────────────────────────
 function openReview() {
+  if (submitted) { document.getElementById('score-overlay').classList.add('active'); return; } // already graded: show the score
   const unanswered = answers.filter(a => a === null).length;
   const flagCount  = flagged.filter(Boolean).length;
   document.getElementById('review-sub').textContent =
@@ -972,6 +981,7 @@ function gradeLocally(answerMap) {
 }
 
 async function submitTest() {
+  if (submitted) return; // graded and saved once (also stops a double-click from saving twice)
   submitted = true;
   clearInterval(timerInterval);
 
@@ -987,7 +997,9 @@ async function submitTest() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ bank: moduleKey, answers: answerMap })
     });
+    if (!res.ok) throw new Error('Grading failed: ' + res.status);
     result = await res.json();
+    if (!result || !Array.isArray(result.review)) throw new Error('Bad grading response');
   } catch (e) {
     alert("Couldn't reach the grading server. Check your internet connection and try Submit again.");
     submitted = false;
@@ -1019,7 +1031,7 @@ async function submitTest() {
   let domHtml = '';
   const domainData = [];
   for (const d of domains) {
-    const dQs = QUESTIONS.filter(q => q.domain === d);
+    const dQs = QUESTIONS.filter(q => q.domain && q.domain.startsWith(d)); // "Standard English" also covers "Standard English Conventions"
     if (dQs.length === 0) continue;
     const dCorrect = dQs.filter(q => (reviewById[q.id] || {}).status === 'correct').length;
     const dTotal = dQs.length;

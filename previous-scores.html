@@ -131,7 +131,7 @@
   </style>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="theme.css?v=3" />
-  <script src="sidebar.js?v=7"></script>
+  <script src="sidebar.js?v=8"></script>
 </head>
 <body>
 
@@ -242,15 +242,27 @@
     if (token) {
       const email = await authVerifySession();
       if (email) {
-        isAccountMode = true;
+        let fromServer = null;
         try {
           const res = await fetch(`${AUTH_API_BASE}/api/my-results`, {
             headers: { 'Authorization': `Bearer ${token}` }
           });
-          history = res.ok ? await res.json() : [];
-        } catch (e) { history = []; }
+          if (res.ok) fromServer = await res.json();
+        } catch (e) {}
+        if (Array.isArray(fromServer)) {
+          isAccountMode = true;
+          history = fromServer;
+          history.sort((a, b) => new Date(b.date) - new Date(a.date));
+          showSyncStatus(email);
+          return;
+        }
+        // Server unreachable: show what's saved on this device (scores taken while offline are kept here)
+        // instead of an empty list.
+        isAccountMode = false;
+        try { history = JSON.parse(localStorage.getItem(HKEY) || '[]'); } catch (e) { history = []; }
         history.sort((a, b) => new Date(b.date) - new Date(a.date));
-        showSyncStatus(email);
+        const el = document.getElementById('sync-status');
+        if (el) el.innerHTML = `Signed in as <strong>${escH(email)}</strong>, but the results server can’t be reached right now — showing results saved on this device.`;
         return;
       }
     }
@@ -302,7 +314,7 @@
         <input type="checkbox" class="hist-check" data-id="${r.id}" onchange="updateDeleteBtn()" />
         <div class="hist-main" onclick="openDetail('${r.id}')">
           <div class="hist-top">
-            <span class="hist-type">${r.typeLabel}</span>
+            <span class="hist-type">${escH(r.typeLabel)}</span>
             <span class="hist-title">${escH(r.title)}</span>
           </div>
           <span class="hist-date">${fmtDate(r.date)}</span>
@@ -368,7 +380,7 @@
       document.getElementById('module-detail').style.display = 'none';
       document.getElementById('full-detail').style.display = 'block';
       document.getElementById('f-title').textContent = r.title;
-      document.getElementById('f-sub').textContent = `Full-Length Practice Test · ${fmtDate(r.date)}`;
+      document.getElementById('f-sub').textContent = `${r.typeLabel === 'Adaptive Test' ? 'Adaptive Practice Test' : 'Full-Length Practice Test'} · ${fmtDate(r.date)}`;
       document.getElementById('f-total').textContent = r.fulltest.total;
       document.getElementById('f-rw').textContent = r.fulltest.rw;
       document.getElementById('f-math').textContent = r.fulltest.math;

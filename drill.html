@@ -640,6 +640,8 @@ function goToQuestion(i) {
   currentQ = i;
   renderQuestion(i);
   updateNav();
+  // A new question starts at the top (on phones the passage and question share one scroll).
+  ['.test-body', '#passage-pane', '#question-pane'].forEach(sel => { const el = document.querySelector(sel); if (el) el.scrollTop = 0; });
 }
 
 function prevQuestion() {
@@ -802,10 +804,12 @@ function renderQuestion(i) {
       let charCount = 0, inT = false;
       let startHtmlPos = -1, endHtmlPos = -1;
       for (let i = 0; i < htmlStr.length; i++) {
+        // Check the end before skipping a tag: a segment that ends right before a tag must
+        // close there, or the browser carries the open <u> over the rest of the passage.
+        if (charCount === endIdx && endHtmlPos === -1 && startHtmlPos !== -1) { endHtmlPos = i; break; }
         if (htmlStr[i] === '<') { inT = true; }
         if (!inT) {
           if (charCount === idx && startHtmlPos === -1) startHtmlPos = i;
-          if (charCount === endIdx && endHtmlPos === -1) { endHtmlPos = i; break; }
           charCount++;
         }
         if (htmlStr[i] === '>') { inT = false; }
@@ -896,7 +900,9 @@ function selectAnswer(qi, ci) {
   if (submitted) return;
   answers[qi] = ci;
   updateNav();
-  renderQuestion(qi);
+  // Update the choices in place. Re-rendering the whole question would rebuild the passage
+  // and re-apply highlights by searching for their text, which can move or drop them.
+  document.querySelectorAll('#question-pane .answer-option').forEach((el, k) => el.classList.toggle('selected', k === ci));
 }
 
 function toggleFlag(qi) {
@@ -906,6 +912,7 @@ function toggleFlag(qi) {
 
 // ── Review Overlay ────────────────────────────────────────────
 function openReview() {
+  if (submitted) { document.getElementById('score-overlay').classList.add('active'); return; } // already graded: show the score
   const unanswered = answers.filter(a => a === null).length;
   const flagCount  = flagged.filter(Boolean).length;
   document.getElementById('review-sub').textContent =
@@ -936,6 +943,7 @@ function closeOverlay(id) {
 // only if you're not (same as before).
 
 async function submitTest() {
+  if (submitted) return; // graded and saved once (also stops a double-click from saving twice)
   submitted = true;
   clearInterval(timerInterval);
 
@@ -950,7 +958,9 @@ async function submitTest() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ bank: moduleKey, answers: answerMap })
     });
+    if (!res.ok) throw new Error('Grading failed: ' + res.status);
     result = await res.json();
+    if (!result || !Array.isArray(result.review)) throw new Error('Bad grading response');
   } catch (e) {
     alert("Couldn't reach the grading server. Check your internet connection and try Submit again.");
     submitted = false;
