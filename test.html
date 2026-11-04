@@ -507,7 +507,11 @@
   </div>
 </div>
 
-<script src="questionbank.js"></script>
+<script>
+// The 4 MB question bank is only needed for Hard Question Bank sets; practice modules come from the server
+// and Recycles from recyclebank.js. Written in during parsing so it still loads before the scripts below.
+if (new URLSearchParams(location.search).get('test') === 'hard') document.write('<script src="questionbank.js"><\/script>');
+</script>
 <script src="hardbank.js"></script>
 <script src="recyclebank.js"></script>
 <script>
