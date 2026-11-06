@@ -617,7 +617,7 @@ async function initTest() {
     const match = DOMAIN_ORDER.find(d => q.domain && q.domain.startsWith(d));
     if (match) _grouped[match].push(q);
   });
-  // Recycles sets keep their own order (most repeated first); everything else runs in domain order.
+  // Recycles sets keep their own order (most repeated first, or the team doc's order for set 2); everything else runs in domain order.
   QUESTIONS = RECYCLE_MODE ? rawQuestions.slice() : DOMAIN_ORDER.flatMap(d => _grouped[d]);
 
   const totalQ = QUESTIONS.length;
