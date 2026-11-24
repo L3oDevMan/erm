@@ -13,16 +13,27 @@
 
 /* ── 1. Tokens ─────────────────────────────────────────────── */
 :root:where(:not(:has(body.exam))) {
-  --paper:#ffffff; --ink:#1d1d1f; --ink-2:#3a3d44; --muted:#5b5f66; --faint:#8b9099;
-  --line:#dcdee3; --line-strong:#b8bcc4; --band:#f5f6f8; --rule:#2b2b2b; --choice:#4a4a4a;
-  --accent:#3046c5; --accent-hover:#23379f; --accent-soft:#eceffc; --on-accent:#ffffff;
-  --ok:#17803d; --ok-soft:#e8f5ec; --bad:#c0392b; --bad-soft:#fcefed; --warn:#a2640a;
+  /* SATLab brand: navy ink and the blue of the A's dot and the flask's liquid */
+  --brand-navy:#0B1020; --brand-blue:#0A5FE0;
+  --ground:#F4F7FC; --paper:#ffffff; --ink:#0B1020; --ink-2:#2E3548; --muted:#545C70; --faint:#8790A5;
+  --line:#DCE3EE; --line-strong:#B3BDCF; --band:#EEF3FB; --rule:#0B1020; --choice:#3A4152;
+  --accent:#0A5FE0; --accent-hover:#0849B0; --accent-soft:#E6EFFD; --accent-ink:#0849B0; --on-accent:#ffffff;
+  /* the shell: sidebar on desktop, header on phones */
+  --shell:#0B1020; --shell-2:#161D33; --shell-line:#232B45; --shell-line-strong:#3A4466; --shell-text:#C8D0E2; --shell-muted:#8D97B0; --shell-strong:#ffffff;
+  /* categories, used for icon tiles and result badges: both sections / Math / Reading & Writing / Hard */
+  --cat-full:#0B1020; --cat-full-soft:#E4E8F1;
+  --cat-math:#0A5FE0; --cat-math-soft:#E6EFFD;
+  --cat-rw:#5B3FD0; --cat-rw-soft:#EEEAFC;
+  --warm:#A35A00; --warm-soft:#FDF0DA; --warm-on-shell:#FFB84D;
+  /* states and score bands */
+  --ok:#147A3A; --ok-soft:#E5F4EA; --ok-fill:#1E9E4E; --bad:#C0352B; --bad-soft:#FCEBE9; --bad-fill:#D9473A;
+  --warn:#9A5B00; --warn-soft:#FDF0DA; --warn-fill:#C47A00;
   --font-ui:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
   --font-serif:'Source Serif 4','Noto Serif',Georgia,'Times New Roman',serif;
   --col:960px; --gutter:2.5rem;
   --r-sm:6px; --r-md:8px; --r-lg:10px; --r-xl:12px;
-  --shadow-sm:0 1px 2px rgba(20,22,28,.06);
-  --shadow-md:0 8px 24px -8px rgba(20,22,28,.18),0 2px 6px rgba(20,22,28,.06);
+  --shadow-sm:0 1px 2px rgba(11,16,32,.06);
+  --shadow-md:0 8px 24px -8px rgba(11,16,32,.20),0 2px 6px rgba(11,16,32,.06);
   --dash:repeating-linear-gradient(90deg,var(--rule) 0 12px,transparent 12px 18px);
   /* older names the pages' own styles still use */
   --black:var(--ink); --gray-dark:var(--ink-2); --gray-mid:var(--muted); --gray-light:var(--faint);
@@ -33,10 +44,16 @@
   color-scheme:light;
 }
 :root[data-theme="dark"]:where(:not(:has(body.exam))) {
-  --paper:#16181d; --ink:#e8eaee; --ink-2:#c9ccd3; --muted:#a3a8b2; --faint:#717683;
-  --line:#30343d; --line-strong:#4a4f5a; --band:#1d2027; --rule:#8d939e; --choice:#8a909b;
-  --accent:#8b9aff; --accent-hover:#a6b1ff; --accent-soft:rgba(125,142,255,.16); --on-accent:#11131a;
-  --ok:#5fd08e; --ok-soft:rgba(70,180,110,.15); --bad:#ff8a7a; --bad-soft:rgba(230,100,85,.15); --warn:#e0b050;
+  --ground:#0D1222; --paper:#141A2C; --ink:#E9EDF6; --ink-2:#C5CCDC; --muted:#9AA3BA; --faint:#6F7891;
+  --line:#262E46; --line-strong:#3A4462; --band:#1A2136; --rule:#8D97B0; --choice:#8D97B0;
+  --accent:#5B9BFF; --accent-hover:#82B3FF; --accent-soft:#16284D; --accent-ink:#8CB8FF; --on-accent:#07101F;
+  --shell:#070A15; --shell-2:#121830; --shell-line:#1C2440; --shell-line-strong:#323C5E; --shell-text:#C8D0E2; --shell-muted:#8D97B0;
+  --cat-full:#C8D0E2; --cat-full-soft:#1E2640;
+  --cat-math:#7AAEFF; --cat-math-soft:#132A52;
+  --cat-rw:#B4A5FF; --cat-rw-soft:#241E4A;
+  --warm:#FFB84D; --warm-soft:#3A2A10;
+  --ok:#5BD08A; --ok-soft:#10301F; --ok-fill:#3DBA6E; --bad:#FF8A7A; --bad-soft:#3A1A1A; --bad-fill:#E8604F;
+  --warn:#F0B44C; --warn-soft:#3A2A10; --warn-fill:#E0A030;
   --shadow-sm:0 1px 2px rgba(0,0,0,.4);
   --shadow-md:0 10px 30px -8px rgba(0,0,0,.6),0 2px 6px rgba(0,0,0,.4);
   --black:var(--ink); --gray-dark:var(--ink-2); --gray-mid:var(--muted); --gray-light:var(--faint);
@@ -47,11 +64,29 @@
   color-scheme:dark;
 }
 
+/* tester.html (a sample module that is not body.exam) keeps the pre-brand palette, so it looks exactly as before */
+:root:has(.tester-badge) {
+  --ground:#ffffff; --paper:#ffffff; --ink:#1d1d1f; --ink-2:#3a3d44; --muted:#5b5f66; --faint:#8b9099;
+  --line:#dcdee3; --line-strong:#b8bcc4; --band:#f5f6f8; --rule:#2b2b2b; --choice:#4a4a4a;
+  --accent:#3046c5; --accent-hover:#23379f; --accent-soft:#eceffc; --on-accent:#ffffff;
+  --ok:#17803d; --ok-soft:#e8f5ec; --bad:#c0392b; --bad-soft:#fcefed; --warn:#a2640a;
+  --shadow-sm:0 1px 2px rgba(20,22,28,.06);
+  --shadow-md:0 8px 24px -8px rgba(20,22,28,.18),0 2px 6px rgba(20,22,28,.06);
+}
+:root[data-theme="dark"]:has(.tester-badge) {
+  --ground:#16181d; --paper:#16181d; --ink:#e8eaee; --ink-2:#c9ccd3; --muted:#a3a8b2; --faint:#717683;
+  --line:#30343d; --line-strong:#4a4f5a; --band:#1d2027; --rule:#8d939e; --choice:#8a909b;
+  --accent:#8b9aff; --accent-hover:#a6b1ff; --accent-soft:rgba(125,142,255,.16); --on-accent:#11131a;
+  --ok:#5fd08e; --ok-soft:rgba(70,180,110,.15); --bad:#ff8a7a; --bad-soft:rgba(230,100,85,.15); --warn:#e0b050;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.4);
+  --shadow-md:0 10px 30px -8px rgba(0,0,0,.6),0 2px 6px rgba(0,0,0,.4);
+}
+
 /* ── 2. Base and browser surfaces ──────────────────────────── */
 html:where(:not(:has(body.exam))), body:where(:not(.exam)) {
-  background:var(--paper); color:var(--ink); font-family:var(--font-ui); transition:none;
+  background:var(--ground); color:var(--ink); font-family:var(--font-ui); transition:none;
 }
-html:where(:not(:has(body.exam))) { scrollbar-color:var(--line-strong) var(--paper); }
+html:where(:not(:has(body.exam))) { scrollbar-color:var(--line-strong) var(--ground); }
 body:where(:not(.exam)) { font-size:16px; line-height:1.5; caret-color:var(--accent); font-feature-settings:'cv11'; }
 :where(body:not(.exam)) ::selection, body:where(:not(.exam))::selection { background:color-mix(in srgb, var(--accent) 24%, transparent); color:inherit; }
 :where(body:not(.exam)) :focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
@@ -74,9 +109,9 @@ body:where(:not(.exam)) { font-size:16px; line-height:1.5; caret-color:var(--acc
   height:60px; padding:0 var(--gutter); background:var(--paper); border-bottom:1px solid var(--line);
   backdrop-filter:none; -webkit-backdrop-filter:none;
 }
-:where(body:not(.exam)) .logo { font-family:var(--font-serif); font-size:20px; font-weight:600; letter-spacing:-.01em; color:var(--ink); }
+:where(body:not(.exam)) .logo { display:flex; align-items:center; gap:8px; font-size:0; line-height:0; color:var(--ink); }
 :where(body:not(.exam)) .breadcrumb { font-size:14px; color:var(--muted); gap:8px; }
-:where(body:not(.exam)) .breadcrumb .sep { color:var(--faint); }
+:where(body:not(.exam)) .breadcrumb .sep { color:var(--muted); }
 :where(body:not(.exam)) .breadcrumb .crumb:hover { color:var(--ink); text-decoration:underline; text-underline-offset:3px; }
 :where(body:not(.exam)) .breadcrumb .cur { color:var(--ink); font-weight:500; }
 :where(body:not(.exam)) .site-footer { display:flex; align-items:center; justify-content:space-between; margin-top:auto; border-top:1px solid var(--line); background:none; padding:1.25rem var(--gutter); gap:.25rem 1rem; flex-wrap:wrap; }
@@ -173,11 +208,19 @@ body:where(:not(.exam)) { font-size:16px; line-height:1.5; caret-color:var(--acc
 :where(body:not(.exam)) .hist-row { gap:14px; }
 :where(body:not(.exam)) .hist-main { gap:4px; }
 :where(body:not(.exam)) .hist-top { gap:8px; }
-:where(body:not(.exam)) .hist-type { font-size:12px; font-weight:500; color:var(--ink-2); border:1px solid var(--line); border-radius:4px; padding:1px 7px; background:none; }
+:where(body:not(.exam)) .hist-type { font-size:12px; font-weight:600; color:var(--cat-full); border:0; border-radius:4px; padding:2px 7px; background:var(--cat-full-soft); }
+:where(body:not(.exam)) .hist-type[data-cat="math"] { color:var(--cat-math); background:var(--cat-math-soft); }
+:where(body:not(.exam)) .hist-type[data-cat="rw"] { color:var(--cat-rw); background:var(--cat-rw-soft); }
 :where(body:not(.exam)) .hist-type:empty { display:none; }
 :where(body:not(.exam)) .hist-title { font-size:16px; font-weight:500; color:var(--ink); }
 :where(body:not(.exam)) .hist-date { font-size:13px; color:var(--muted); }
 :where(body:not(.exam)) .hist-score-num { font:600 17px/1.2 var(--font-ui); color:var(--ink); }
+/* score band: a tinted pill on the number, the percentage beside it says the same in words */
+:where(body:not(.exam)) .hist-score[data-band] .hist-score-num { display:inline-block; padding:3px 9px; border-radius:6px; }
+:where(body:not(.exam)) .hist-score[data-band="strong"] .hist-score-num { color:var(--ok); background:var(--ok-soft); }
+:where(body:not(.exam)) .hist-score[data-band="mid"] .hist-score-num { color:var(--warn); background:var(--warn-soft); }
+:where(body:not(.exam)) .hist-score[data-band="weak"] .hist-score-num { color:var(--bad); background:var(--bad-soft); }
+:where(body:not(.exam)) .hist-score-pct { margin-top:3px; }
 :where(body:not(.exam)) .hist-score-pct { font-size:13px; color:var(--muted); }
 :where(body:not(.exam)) .d-title { font-family:var(--font-serif); font-weight:600; font-size:28px; letter-spacing:-.01em; color:var(--ink); }
 :where(body:not(.exam)) .d-sub { font-size:14px; color:var(--muted); }
@@ -185,6 +228,7 @@ body:where(:not(.exam)) { font-size:16px; line-height:1.5; caret-color:var(--acc
 :where(body:not(.exam)) .score-pct { font-size:14px; }
 :where(body:not(.exam)) .score-row { border-bottom:1px solid var(--line); }
 :where(body:not(.exam)) .sstat .n { font:600 22px/1.2 var(--font-ui); color:var(--ink); }
+:where(body:not(.exam)) #m-ok { color:var(--ok); } :where(body:not(.exam)) #m-bad { color:var(--bad); }
 :where(body:not(.exam)) .sstat .l, :where(body:not(.exam)) .section-score-lbl { font-size:13px; color:var(--muted); }
 :where(body:not(.exam)) .total-score-card, :where(body:not(.exam)) .module-result-card { border:1px solid var(--line); border-radius:var(--r-lg); box-shadow:none; background:var(--paper); }
 :where(body:not(.exam)) .total-score-num { font-family:var(--font-serif); font-weight:600; font-size:60px; color:var(--ink); }
@@ -200,24 +244,33 @@ body:where(:not(.exam)) { font-size:16px; line-height:1.5; caret-color:var(--acc
 /* ── 9. Progress bars (Weakness Profile, score detail) ─────── */
 :where(body:not(.exam)) .bar-wrap, :where(body:not(.exam)) .domain-bar-wrap { height:6px; border-radius:999px; background:var(--band); box-shadow:inset 0 0 0 1px var(--line); }
 :where(body:not(.exam)) .bar-fill, :where(body:not(.exam)) .domain-bar { border-radius:999px; background:var(--accent); }
-:where(body:not(.exam)) .bar-fill.weak { background:var(--bad); } :where(body:not(.exam)) .bar-fill.mid { background:var(--warn); } :where(body:not(.exam)) .bar-fill.strong { background:var(--ok); }
+:where(body:not(.exam)) .bar-fill.weak { background:var(--bad-fill); } :where(body:not(.exam)) .bar-fill.mid { background:var(--warn-fill); } :where(body:not(.exam)) .bar-fill.strong { background:var(--ok-fill); }
 
 /* ── 10. Weakness Profile ──────────────────────────────────── */
-:where(body:not(.exam)) .overview { gap:0; padding:0; margin-bottom:2.5rem; border:1px solid var(--line); border-radius:var(--r-lg); }
+:where(body:not(.exam)) .overview { gap:0; padding:0; margin-bottom:2.5rem; border:1px solid var(--line); border-radius:var(--r-lg); background:var(--paper); }
 :where(body:not(.exam)) .ov-stat { flex:1 1 160px; padding:1.1rem 1.25rem; }
 :where(body:not(.exam)) .ov-stat + .ov-stat { border-left:1px solid var(--line); }
 :where(body:not(.exam)) .ov-stat .n { font:600 26px/1.2 var(--font-ui); color:var(--ink); }
+:where(body:not(.exam)) .ov-stat .n[data-band="strong"] { color:var(--ok); } :where(body:not(.exam)) .ov-stat .n[data-band="mid"] { color:var(--warn); } :where(body:not(.exam)) .ov-stat .n[data-band="weak"] { color:var(--bad); }
 :where(body:not(.exam)) .ov-stat .l { font-size:13px; color:var(--muted); margin-top:4px; }
 :where(body:not(.exam)) .domain-list { margin-bottom:2.75rem; }
 :where(body:not(.exam)) .domain-row { gap:14px; padding:12px 18px; border:0; }
 :where(body:not(.exam)) .domain-row + .domain-row { border-top:1px solid var(--line); }
 :where(body:not(.exam)) .domain-row:first-child { border-top:0; }
 :where(body:not(.exam)) .domain-name { font-size:15px; color:var(--ink); }
+/* bars line up whether or not a row carries the Focus badge */
+@media (min-width:601px) {
+  :where(body:not(.exam)) .domain-row { display:grid; grid-template-columns:3.6rem 16rem minmax(0,1fr) 6.5rem; }
+  :where(body:not(.exam)) .domain-name { grid-column:1 / 3; width:auto; }
+  :where(body:not(.exam)) .domain-focus-badge { grid-column:1; justify-self:start; }
+  :where(body:not(.exam)) .domain-focus-badge + .domain-name { grid-column:2; }
+  :where(body:not(.exam)) .domain-sc { width:auto; }
+}
 :where(body:not(.exam)) .domain-sc { font-size:13px; color:var(--muted); }
-:where(body:not(.exam)) .domain-focus-badge { font-size:12px; font-weight:600; color:var(--bad); border:1px solid var(--bad); border-radius:4px; padding:1px 6px; background:none; }
+:where(body:not(.exam)) .domain-focus-badge { font-size:12px; font-weight:600; color:var(--bad); border:0; border-radius:4px; padding:2px 7px; background:var(--bad-soft); }
 
 /* ── 11. Empty and guest states ────────────────────────────── */
-:where(body:not(.exam)) .empty-state, :where(body:not(.exam)) .guest-block { background:none; border:1px solid var(--line); border-radius:var(--r-lg); color:var(--muted); font-size:15px; line-height:1.6; }
+:where(body:not(.exam)) .empty-state, :where(body:not(.exam)) .guest-block { background:var(--paper); border:1px solid var(--line); border-radius:var(--r-lg); color:var(--muted); font-size:15px; line-height:1.6; }
 :where(body:not(.exam)) .empty-state { margin-top:0; padding:3rem 1.5rem; }
 :where(body:not(.exam)) .empty-state .big, :where(body:not(.exam)) .guest-block .big { font:600 18px/1.35 var(--font-ui); letter-spacing:0; color:var(--ink); margin-bottom:.35rem; }
 :where(body:not(.exam)) .guest-block a.cta { height:44px; padding:0 22px; font-size:15px; }
@@ -269,6 +322,43 @@ body:not(.exam) .rq-submit:hover { background:var(--accent-hover); }
 body:not(.exam) .rq-box { border-radius:var(--r-xl); border:1px solid var(--line); }
 body:not(.exam) .rq-ctx, body:not(.exam) .rq-count { font-family:var(--font-ui); font-variant-numeric:tabular-nums; }
 
+/* ── 16. Brand marks ───────────────────────────────────────── */
+/* Each logo is a pair of <img>s, ink (.on-light) and white (.on-dark); the ground decides which shows. */
+:where(body:not(.exam)) .wm { display:block; height:22px; width:auto; }
+:where(body:not(.exam)) .mark { display:block; width:36px; height:36px; margin:-6px -4px -6px -8px; } /* the flask sits inside a padded square */
+:where(body:not(.exam)) .on-dark { display:none; }
+:root[data-theme="dark"] :where(body:not(.exam)) .on-light { display:none; }
+:root[data-theme="dark"] :where(body:not(.exam)) .on-dark { display:block; }
+:where(body:not(.exam)) .logo { cursor:pointer; }
+:root :where(body:not(.exam)) .logo .mark.mark { display:none; } /* beats the dark-theme .on-dark rule above */
+:where(body:not(.exam)) .footer-copy { display:flex; align-items:center; gap:10px; }
+:where(body:not(.exam)) .footer-copy .wm { height:17px; }
+/* empty states carry the flask */
+:where(body:not(.exam)) .empty-state::before { content:''; display:block; width:64px; height:64px; margin:-.5rem auto .5rem; background:url("brand/satlab-icon.svg") center/contain no-repeat; }
+:root[data-theme="dark"] :where(body:not(.exam)) .empty-state::before { background-image:url("brand/satlab-icon-white.svg"); }
+/* login: flask and wordmark above the form */
+:where(body:not(.exam)) .auth-brand { display:flex; align-items:center; justify-content:center; gap:10px; margin:0 auto 1.5rem; }
+:where(body:not(.exam)) .auth-brand .mark { width:60px; height:60px; margin:-10px -6px -10px -12px; }
+:where(body:not(.exam)) .auth-brand .wm { height:30px; }
+:where(body:not(.exam)) .auth-col { width:100%; max-width:400px; }
+
+/* On phones the header is the shell (the sidebar is hidden): navy, white wordmark, flask */
+@media (max-width:900px) {
+  :where(body:not(.exam)) .site-header { background:var(--shell); border-bottom-color:var(--shell); color:var(--shell-text); }
+  :where(body:not(.exam)) .site-header .on-light { display:none; }
+  :where(body:not(.exam)) .site-header .on-dark { display:block; }
+  :where(body:not(.exam)) .site-header .logo .mark.on-dark { display:block; }
+  :where(body:not(.exam)) .site-header .wm { height:20px; }
+  :where(body:not(.exam)) .site-header .back-btn, :where(body:not(.exam)) .site-header .settings-btn { background:transparent; color:var(--shell-strong); border-color:var(--shell-line-strong); }
+  :where(body:not(.exam)) .site-header .back-btn:hover, :where(body:not(.exam)) .site-header .settings-btn:hover { background:var(--shell-2); border-color:var(--shell-text); color:var(--shell-strong); }
+  :where(body:not(.exam)) .site-header #account-status a, :where(body:not(.exam)) .site-header #account-status span { color:var(--shell-text) !important; border-color:var(--shell-line-strong) !important; }
+  :where(body:not(.exam)) .site-header #account-status a[href="login.html"] { color:var(--shell-strong) !important; }
+  :where(body:not(.exam)) .site-header #account-status a[href="login.html"]:hover { background:var(--shell-2); border-color:var(--shell-text) !important; }
+  :where(body:not(.exam)) .site-header .breadcrumb, :where(body:not(.exam)) .site-header .breadcrumb .sep { color:var(--shell-muted); }
+  :where(body:not(.exam)) .site-header .breadcrumb .cur, :where(body:not(.exam)) .site-header .breadcrumb .crumb:hover { color:var(--shell-strong); }
+  :where(body:not(.exam)) .site-header :focus-visible { outline-color:#8CB8FF; }
+}
+
 @media (max-width:600px) {
   :root:where(:not(:has(body.exam))) { --gutter:1rem; }
   :where(body:not(.exam)) .hero, :where(body:not(.exam)) .settings-hero, :where(body:not(.exam)) .subj-hero, :where(body:not(.exam)) .mod-hero { padding-top:2rem; }
@@ -276,6 +366,7 @@ body:not(.exam) .rq-ctx, body:not(.exam) .rq-count { font-family:var(--font-ui);
   :where(body:not(.exam)) .tests-section, :where(body:not(.exam)) .mod-section, :where(body:not(.exam)) .list-section, :where(body:not(.exam)) .content, :where(body:not(.exam)) .settings-section { padding-top:1.75rem; padding-bottom:3rem; }
   :where(body:not(.exam)) .test-row, :where(body:not(.exam)) .test-row:hover, :where(body:not(.exam)) .hist-row, :where(body:not(.exam)) .hist-row:hover { padding:13px 14px; }
   :where(body:not(.exam)) .auth-box { padding:1.75rem 1.25rem; border:0; }
+  :where(body:not(.exam)) .auth-wrap { padding:2rem var(--gutter) 2.5rem; }
   :where(body:not(.exam)) .ov-stat + .ov-stat { border-left:0; border-top:1px solid var(--line); }
   :where(body:not(.exam)) .overview { flex-direction:column; }
 }

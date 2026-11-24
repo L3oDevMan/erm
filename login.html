@@ -5,6 +5,10 @@
   <script>(function(){try{var t=localStorage.getItem('sat-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Log In — SATLab</title>
+  <link rel="icon" type="image/svg+xml" href="brand/satlab-icon.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="brand/favicon-32.png" />
+  <link rel="apple-touch-icon" href="brand/apple-touch-icon.png" />
+  <meta name="theme-color" content="#0B1020" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet" />
   <style>
@@ -45,17 +49,18 @@
     .guest-note { font-size:12px; color:var(--gray-mid); text-align:center; margin-top:2rem; line-height:1.6; }
     .guest-note a { color:var(--black); }
   </style>
-  <link rel="stylesheet" href="theme.css?v=6" />
+  <link rel="stylesheet" href="theme.css?v=7" />
 </head>
 <body>
 
 <div class="page">
   <header class="site-header">
-    <div class="logo" onclick="window.location.href='index.html'">SATLab</div>
     <button class="back-btn is-back" onclick="window.location.href='index.html'">Back</button>
   </header>
 
   <div class="auth-wrap">
+    <div class="auth-col">
+    <a class="auth-brand" href="index.html"><img class="mark on-light" src="brand/satlab-icon.svg" alt="" width="60" height="60" /><img class="mark on-dark" src="brand/satlab-icon-white.svg" alt="" width="60" height="60" /><img class="wm on-light" src="brand/satlab-wordmark.svg" alt="SATLab" width="95" height="30" /><img class="wm on-dark" src="brand/satlab-wordmark-white.svg" alt="SATLab" width="95" height="30" /></a>
     <div class="auth-box">
       <h1 class="auth-title" id="auth-title">Log In</h1>
       <p class="auth-sub">Save your scores to your account so they sync across every device.</p>
@@ -80,6 +85,7 @@
       <div class="msg" id="msg" role="status" aria-live="polite"></div>
 
       <p class="guest-note">You don’t need an account to use SATLab: without one, scores save to this device only. <a href="index.html">Continue as guest</a></p>
+    </div>
     </div>
   </div>
 </div>

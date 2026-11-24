@@ -13,6 +13,10 @@
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SATLab</title>
+  <link rel="icon" type="image/svg+xml" href="brand/satlab-icon.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="brand/favicon-32.png" />
+  <link rel="apple-touch-icon" href="brand/apple-touch-icon.png" />
+  <meta name="theme-color" content="#0B1020" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet" />
   <style>
@@ -20,13 +24,13 @@
     html, body { min-height:100vh; -webkit-font-smoothing:antialiased; }
     /* everything else: theme.css (shared) and home.css (this page) */
   </style>
-  <link rel="stylesheet" href="theme.css?v=6" />
-  <link rel="stylesheet" href="home.css?v=5" />
+  <link rel="stylesheet" href="theme.css?v=7" />
+  <link rel="stylesheet" href="home.css?v=6" />
 </head>
 <body class="site-index">
 
 <aside class="sidebar" aria-label="Main navigation">
-  <div class="sb-brand" onclick="show('home')">SATLab</div>
+  <div class="sb-brand" onclick="show('home')"><img class="wm" src="brand/satlab-wordmark-white.svg" alt="SATLab" width="95" height="30" /></div>
   <nav class="sb-nav">
     <button class="sb-link active" data-nav="home" onclick="show('home')"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Home</button>
     <div class="sb-label">Practice</div>
@@ -49,7 +53,7 @@
 <!-- HOME -->
 <div id="home" class="page active">
   <header class="site-header">
-    <div class="logo" onclick="show('home')">SATLab</div>
+    <div class="logo" onclick="show('home')"><img class="mark on-dark" src="brand/satlab-icon-white.svg" alt="" width="36" height="36" /><img class="wm on-light" src="brand/satlab-wordmark.svg" alt="SATLab" width="70" height="22" /><img class="wm on-dark" src="brand/satlab-wordmark-white.svg" alt="SATLab" width="70" height="22" /></div>
     <div class="hdr-right">
       <span class="hdr-meta">Digital SAT · 2025–2026</span>
       <span id="account-status"></span>
@@ -72,6 +76,7 @@
         <ul class="hero-facts"><li>28 practice tests</li><li>2,724 questions</li><li>10 skill drills</li></ul>
       </div>
       <div class="countdown-widget" id="countdown-widget" role="timer" aria-label="Time until the next SAT">
+        <img class="cd-mark" src="brand/satlab-icon-white.svg" alt="" width="92" height="92" />
         <div class="countdown-label">Time until the <strong id="cd-month">—</strong> SAT</div>
         <div class="countdown-nums">
           <div class="countdown-unit"><div class="val" id="cd-days">--</div><div class="lbl">days</div></div>
@@ -85,25 +90,25 @@
   <section class="areas" aria-label="Practice">
     <h2>Tests</h2>
     <ul class="area-grid">
-      <li><a class="area" href="#adaptive" onclick="show('adaptive');return false;">
+      <li><a class="area" data-cat="full" href="#adaptive" onclick="show('adaptive');return false;">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17l5-5 4 4 8-9"/><path d="M15 7h5v5"/></svg>
         <span class="area-name">Adaptive Test</span><span class="test-arrow" aria-hidden="true"></span>
         <span class="area-desc">A full SAT where your Module 1 result decides whether Module 2 is harder or easier.</span>
         <ul class="area-facts"><li>4 modules, ~2h 14m</li><li>Timer can’t be paused</li><li>Only the harder route reaches 800</li></ul>
       </a></li>
-      <li><a class="area" href="#fulltests" onclick="show('fulltests');return false;">
+      <li><a class="area" data-cat="full" href="#fulltests" onclick="show('fulltests');return false;">
         <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 8h8M8 12h8M8 16h4"/></svg>
         <span class="area-name">Full Test</span><span class="test-arrow" aria-hidden="true"></span>
         <span class="area-desc">A complete Digital SAT: Reading &amp; Writing, then Math, scored out of 1600.</span>
         <ul class="area-facts"><li>4 modules, ~2h 14m</li><li>Randomized from the question bank</li><li>Official scoring curve</li></ul>
       </a></li>
-      <li><a class="area" href="#math" onclick="show('math');return false;">
+      <li><a class="area" data-cat="math" href="#math" onclick="show('math');return false;">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5v14"/></svg>
         <span class="area-name">Math</span><span class="test-arrow" aria-hidden="true"></span>
         <span class="area-desc">Algebra, advanced math, problem-solving and data analysis, geometry and trigonometry.</span>
         <ul class="area-facts"><li>Practice Tests 1–15</li><li>21–22 questions, 35 min per module</li><li>Calculator + Desmos</li></ul>
       </a></li>
-      <li><a class="area" href="#english" onclick="show('english');return false;">
+      <li><a class="area" data-cat="rw" href="#english" onclick="show('english');return false;">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16M4 12h10M4 19h16"/></svg>
         <span class="area-name">Writing</span><span class="test-arrow" aria-hidden="true"></span>
         <span class="area-desc">Reading comprehension, grammar, standard English conventions and rhetoric.</span>
@@ -112,25 +117,25 @@
     </ul>
     <h2>Skill practice</h2>
     <ul class="area-grid">
-      <li><a class="area" href="#drills" onclick="show('drills');return false;">
+      <li><a class="area" data-cat="rw" href="#drills" onclick="show('drills');return false;">
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>
         <span class="area-name">Topical Drills</span><span class="test-arrow" aria-hidden="true"></span>
         <span class="area-desc">Every official Reading &amp; Writing question, sorted by skill. Work one skill until it’s solid.</span>
         <ul class="area-facts"><li>10 skills, 94 modules</li><li>~15 questions per module</li></ul>
       </a></li>
-      <li><a class="area" href="#recall" onclick="show('recall');return false;">
+      <li><a class="area" data-cat="rw" href="#recall" onclick="show('recall');return false;">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5c-4.5 0-8 3.6-9 7 1 3.4 4.5 7 9 7s8-3.6 9-7c-1-3.4-4.5-7-9-7z"/><path d="M9.5 12a2.5 2.5 0 1 0 5 0"/></svg>
         <span class="area-name">Active Recall</span><span class="test-arrow" aria-hidden="true"></span>
         <span class="area-desc">Read a passage, watch it disappear, then write what you remember and answer from memory.</span>
         <ul class="area-facts"><li>60 seconds to read</li><li>Compare with the passage and answer key</li></ul>
       </a></li>
-      <li><a class="area" href="#hard" onclick="show('hard');return false;">
+      <li><a class="area" data-cat="hard" href="#hard" onclick="show('hard');return false;">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg>
         <span class="area-name">Hard Question Bank</span><span class="test-arrow" aria-hidden="true"></span>
         <span class="area-desc">Every question tagged Hard across all practice tests, in sets of 20.</span>
         <ul class="area-facts"><li>Math and Reading &amp; Writing</li><li>Same test screen and tools</li></ul>
       </a></li>
-      <li><a class="area" href="#recycles" onclick="show('recycles');return false;">
+      <li><a class="area" data-cat="rw" href="#recycles" onclick="show('recycles');return false;">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 19H4.5a1.5 1.5 0 0 1-1.3-2.25L5.6 12.6"/><path d="M11 19h8.5a1.5 1.5 0 0 0 1.3-2.25l-1.7-2.95"/><path d="M14 16l-3 3 3 3"/><path d="M8.6 7.5 10.7 4a1.5 1.5 0 0 1 2.6 0l2.6 4.5"/><path d="M15 4.6l.9 4-4 .9"/><path d="M3 9.5l2.6 3.1 3.1-2.6"/></svg>
         <span class="area-name">Recycles</span><span class="test-arrow" aria-hidden="true"></span>
         <span class="area-desc">The questions that keep coming back: 39 seen in 4 or more different tests.</span>
@@ -138,13 +143,13 @@
       </a></li>
     </ul>
   </section>
-  <footer class="site-footer"><div class="footer-copy">SATLab · 2025–2026</div><div class="footer-note">Not affiliated with College Board</div></footer>
+  <footer class="site-footer"><div class="footer-copy"><img class="wm on-light" src="brand/satlab-wordmark.svg" alt="SATLab" width="54" height="17" /><img class="wm on-dark" src="brand/satlab-wordmark-white.svg" alt="SATLab" width="54" height="17" /><span>2025–2026</span></div><div class="footer-note">Not affiliated with College Board</div></footer>
 </div>
 
 <!-- MATH -->
 <div id="math" class="page">
   <header class="site-header">
-    <div class="logo" onclick="show('home')">SATLab</div>
+    <div class="logo" onclick="show('home')"><img class="mark on-dark" src="brand/satlab-icon-white.svg" alt="" width="36" height="36" /><img class="wm on-light" src="brand/satlab-wordmark.svg" alt="SATLab" width="70" height="22" /><img class="wm on-dark" src="brand/satlab-wordmark-white.svg" alt="SATLab" width="70" height="22" /></div>
     <div class="hdr-right">
       <div class="breadcrumb"><span class="crumb" onclick="show('home')">Home</span><span class="sep">/</span><span class="cur">Math</span></div>
       <button class="back-btn is-back" onclick="show('home')">Back</button>
@@ -158,13 +163,13 @@
     <h2 class="sec-label">Practice tests</h2>
     <div class="tests-list" id="math-list"></div>
   </div>
-  <footer class="site-footer"><div class="footer-copy">SATLab · 2025–2026</div><div class="footer-note">Not affiliated with College Board</div></footer>
+  <footer class="site-footer"><div class="footer-copy"><img class="wm on-light" src="brand/satlab-wordmark.svg" alt="SATLab" width="54" height="17" /><img class="wm on-dark" src="brand/satlab-wordmark-white.svg" alt="SATLab" width="54" height="17" /><span>2025–2026</span></div><div class="footer-note">Not affiliated with College Board</div></footer>
 </div>
 
 <!-- FULL-LENGTH TESTS -->
 <div id="fulltests" class="page">
   <header class="site-header">
-    <div class="logo" onclick="show('home')">SATLab</div>
+    <div class="logo" onclick="show('home')"><img class="mark on-dark" src="brand/satlab-icon-white.svg" alt="" width="36" height="36" /><img class="wm on-light" src="brand/satlab-wordmark.svg" alt="SATLab" width="70" height="22" /><img class="wm on-dark" src="brand/satlab-wordmark-white.svg" alt="SATLab" width="70" height="22" /></div>
     <div class="hdr-right">
       <div class="breadcrumb"><span class="crumb" onclick="show('home')">Home</span><span class="sep">/</span><span class="cur">Full Test</span></div>
       <button class="back-btn is-back" onclick="show('home')">Back</button>
@@ -178,13 +183,13 @@
     <h2 class="sec-label">Full-length tests</h2>
     <div class="tests-list" id="full-list"></div>
   </div>
-  <footer class="site-footer"><div class="footer-copy">SATLab · 2025–2026</div><div class="footer-note">Not affiliated with College Board</div></footer>
+  <footer class="site-footer"><div class="footer-copy"><img class="wm on-light" src="brand/satlab-wordmark.svg" alt="SATLab" width="54" height="17" /><img class="wm on-dark" src="brand/satlab-wordmark-white.svg" alt="SATLab" width="54" height="17" /><span>2025–2026</span></div><div class="footer-note">Not affiliated with College Board</div></footer>
 </div>
 
 <!-- ADAPTIVE -->
 <div id="adaptive" class="page">
   <header class="site-header">
-    <div class="logo" onclick="show('home')">SATLab</div>
+    <div class="logo" onclick="show('home')"><img class="mark on-dark" src="brand/satlab-icon-white.svg" alt="" width="36" height="36" /><img class="wm on-light" src="brand/satlab-wordmark.svg" alt="SATLab" width="70" height="22" /><img class="wm on-dark" src="brand/satlab-wordmark-white.svg" alt="SATLab" width="70" height="22" /></div>
     <div class="hdr-right">
       <div class="breadcrumb"><span class="crumb" onclick="show('home')">Home</span><span class="sep">/</span><span class="cur">Adaptive Test</span></div>
       <button class="back-btn is-back" onclick="show('home')">Back</button>
@@ -198,13 +203,13 @@
     <h2 class="sec-label">Adaptive tests</h2>
     <div class="tests-list" id="adaptive-list"></div>
   </div>
-  <footer class="site-footer"><div class="footer-copy">SATLab · 2025–2026</div><div class="footer-note">Not affiliated with College Board</div></footer>
+  <footer class="site-footer"><div class="footer-copy"><img class="wm on-light" src="brand/satlab-wordmark.svg" alt="SATLab" width="54" height="17" /><img class="wm on-dark" src="brand/satlab-wordmark-white.svg" alt="SATLab" width="54" height="17" /><span>2025–2026</span></div><div class="footer-note">Not affiliated with College Board</div></footer>
 </div>
 
 <!-- ACTIVE RECALL -->
 <div id="recall" class="page">
   <header class="site-header">
-    <div class="logo" onclick="show('home')">SATLab</div>
+    <div class="logo" onclick="show('home')"><img class="mark on-dark" src="brand/satlab-icon-white.svg" alt="" width="36" height="36" /><img class="wm on-light" src="brand/satlab-wordmark.svg" alt="SATLab" width="70" height="22" /><img class="wm on-dark" src="brand/satlab-wordmark-white.svg" alt="SATLab" width="70" height="22" /></div>
     <div class="hdr-right">
       <div class="breadcrumb"><span class="crumb" onclick="show('home')">Home</span><span class="sep">/</span><span class="cur">Active Recall</span></div>
       <button class="back-btn is-back" onclick="show('home')">Back</button>
@@ -215,13 +220,13 @@
     <div class="subj-meta">Read each passage for 60 seconds. Then it disappears: write what you remember and answer the question from memory, then compare with the original. Builds the habit of really taking in what you read.</div>
   </div>
   <div class="tests-section" id="recall-sets"></div>
-  <footer class="site-footer"><div class="footer-copy">SATLab · 2025–2026</div><div class="footer-note">Not affiliated with College Board</div></footer>
+  <footer class="site-footer"><div class="footer-copy"><img class="wm on-light" src="brand/satlab-wordmark.svg" alt="SATLab" width="54" height="17" /><img class="wm on-dark" src="brand/satlab-wordmark-white.svg" alt="SATLab" width="54" height="17" /><span>2025–2026</span></div><div class="footer-note">Not affiliated with College Board</div></footer>
 </div>
 
 <!-- HARD QUESTION BANK -->
 <div id="hard" class="page">
   <header class="site-header">
-    <div class="logo" onclick="show('home')">SATLab</div>
+    <div class="logo" onclick="show('home')"><img class="mark on-dark" src="brand/satlab-icon-white.svg" alt="" width="36" height="36" /><img class="wm on-light" src="brand/satlab-wordmark.svg" alt="SATLab" width="70" height="22" /><img class="wm on-dark" src="brand/satlab-wordmark-white.svg" alt="SATLab" width="70" height="22" /></div>
     <div class="hdr-right">
       <div class="breadcrumb"><span class="crumb" onclick="show('home')">Home</span><span class="sep">/</span><span class="cur">Hard Question Bank</span></div>
       <button class="back-btn is-back" onclick="show('home')">Back</button>
@@ -233,13 +238,13 @@
     <div class="hb-stats" id="hb-stats"></div>
   </div>
   <div class="tests-section" id="hb-sets"><div class="hb-notice">Loading the question banks…</div></div>
-  <footer class="site-footer"><div class="footer-copy">SATLab · 2025–2026</div><div class="footer-note">Not affiliated with College Board</div></footer>
+  <footer class="site-footer"><div class="footer-copy"><img class="wm on-light" src="brand/satlab-wordmark.svg" alt="SATLab" width="54" height="17" /><img class="wm on-dark" src="brand/satlab-wordmark-white.svg" alt="SATLab" width="54" height="17" /><span>2025–2026</span></div><div class="footer-note">Not affiliated with College Board</div></footer>
 </div>
 
 <!-- RECYCLES -->
 <div id="recycles" class="page">
   <header class="site-header">
-    <div class="logo" onclick="show('home')">SATLab</div>
+    <div class="logo" onclick="show('home')"><img class="mark on-dark" src="brand/satlab-icon-white.svg" alt="" width="36" height="36" /><img class="wm on-light" src="brand/satlab-wordmark.svg" alt="SATLab" width="70" height="22" /><img class="wm on-dark" src="brand/satlab-wordmark-white.svg" alt="SATLab" width="70" height="22" /></div>
     <div class="hdr-right">
       <div class="breadcrumb"><span class="crumb" onclick="show('home')">Home</span><span class="sep">/</span><span class="cur">Recycles</span></div>
       <button class="back-btn is-back" onclick="show('home')">Back</button>
@@ -251,13 +256,13 @@
     <div class="hb-stats" id="rc-stats"></div>
   </div>
   <div class="tests-section" id="rc-sets"></div>
-  <footer class="site-footer"><div class="footer-copy">SATLab · 2025–2026</div><div class="footer-note">Not affiliated with College Board</div></footer>
+  <footer class="site-footer"><div class="footer-copy"><img class="wm on-light" src="brand/satlab-wordmark.svg" alt="SATLab" width="54" height="17" /><img class="wm on-dark" src="brand/satlab-wordmark-white.svg" alt="SATLab" width="54" height="17" /><span>2025–2026</span></div><div class="footer-note">Not affiliated with College Board</div></footer>
 </div>
 
 <!-- ENGLISH -->
 <div id="english" class="page">
   <header class="site-header">
-    <div class="logo" onclick="show('home')">SATLab</div>
+    <div class="logo" onclick="show('home')"><img class="mark on-dark" src="brand/satlab-icon-white.svg" alt="" width="36" height="36" /><img class="wm on-light" src="brand/satlab-wordmark.svg" alt="SATLab" width="70" height="22" /><img class="wm on-dark" src="brand/satlab-wordmark-white.svg" alt="SATLab" width="70" height="22" /></div>
     <div class="hdr-right">
       <div class="breadcrumb"><span class="crumb" onclick="show('home')">Home</span><span class="sep">/</span><span class="cur">Writing</span></div>
       <button class="back-btn is-back" onclick="show('home')">Back</button>
@@ -271,13 +276,13 @@
     <h2 class="sec-label">Practice tests</h2>
     <div class="tests-list" id="eng-list"></div>
   </div>
-  <footer class="site-footer"><div class="footer-copy">SATLab · 2025–2026</div><div class="footer-note">Not affiliated with College Board</div></footer>
+  <footer class="site-footer"><div class="footer-copy"><img class="wm on-light" src="brand/satlab-wordmark.svg" alt="SATLab" width="54" height="17" /><img class="wm on-dark" src="brand/satlab-wordmark-white.svg" alt="SATLab" width="54" height="17" /><span>2025–2026</span></div><div class="footer-note">Not affiliated with College Board</div></footer>
 </div>
 
 <!-- TOPICAL DRILLS — TOPIC LIST -->
 <div id="drills" class="page">
   <header class="site-header">
-    <div class="logo" onclick="show('home')">SATLab</div>
+    <div class="logo" onclick="show('home')"><img class="mark on-dark" src="brand/satlab-icon-white.svg" alt="" width="36" height="36" /><img class="wm on-light" src="brand/satlab-wordmark.svg" alt="SATLab" width="70" height="22" /><img class="wm on-dark" src="brand/satlab-wordmark-white.svg" alt="SATLab" width="70" height="22" /></div>
     <div class="hdr-right">
       <div class="breadcrumb"><span class="crumb" onclick="show('home')">Home</span><span class="sep">/</span><span class="cur">Topical Drills</span></div>
       <button class="back-btn is-back" onclick="show('home')">Back</button>
@@ -288,13 +293,13 @@
     <div class="subj-meta">Every official Reading &amp; Writing question, sorted by skill into modules of about 15 questions. Pick a skill to drill it.</div>
   </div>
   <div class="tests-section" id="drills-section"></div>
-  <footer class="site-footer"><div class="footer-copy">SATLab · 2025–2026</div><div class="footer-note">Not affiliated with College Board</div></footer>
+  <footer class="site-footer"><div class="footer-copy"><img class="wm on-light" src="brand/satlab-wordmark.svg" alt="SATLab" width="54" height="17" /><img class="wm on-dark" src="brand/satlab-wordmark-white.svg" alt="SATLab" width="54" height="17" /><span>2025–2026</span></div><div class="footer-note">Not affiliated with College Board</div></footer>
 </div>
 
 <!-- TOPICAL DRILLS — MODULE SELECTION -->
 <div id="drillmods" class="page">
   <header class="site-header">
-    <div class="logo" onclick="show('home')">SATLab</div>
+    <div class="logo" onclick="show('home')"><img class="mark on-dark" src="brand/satlab-icon-white.svg" alt="" width="36" height="36" /><img class="wm on-light" src="brand/satlab-wordmark.svg" alt="SATLab" width="70" height="22" /><img class="wm on-dark" src="brand/satlab-wordmark-white.svg" alt="SATLab" width="70" height="22" /></div>
     <div class="hdr-right">
       <div class="breadcrumb">
         <span class="crumb" onclick="show('home')">Home</span><span class="sep">/</span>
@@ -312,13 +317,13 @@
     <h2 class="mod-group-label">Modules</h2>
     <div class="mod-grid" id="dm-grid"></div>
   </div>
-  <footer class="site-footer"><div class="footer-copy">SATLab · 2025–2026</div><div class="footer-note">Not affiliated with College Board</div></footer>
+  <footer class="site-footer"><div class="footer-copy"><img class="wm on-light" src="brand/satlab-wordmark.svg" alt="SATLab" width="54" height="17" /><img class="wm on-dark" src="brand/satlab-wordmark-white.svg" alt="SATLab" width="54" height="17" /><span>2025–2026</span></div><div class="footer-note">Not affiliated with College Board</div></footer>
 </div>
 
 <!-- MODULE SELECTION -->
 <div id="modules" class="page">
   <header class="site-header">
-    <div class="logo" onclick="show('home')">SATLab</div>
+    <div class="logo" onclick="show('home')"><img class="mark on-dark" src="brand/satlab-icon-white.svg" alt="" width="36" height="36" /><img class="wm on-light" src="brand/satlab-wordmark.svg" alt="SATLab" width="70" height="22" /><img class="wm on-dark" src="brand/satlab-wordmark-white.svg" alt="SATLab" width="70" height="22" /></div>
     <div class="hdr-right">
       <div class="breadcrumb">
         <span class="crumb" onclick="show('home')">Home</span><span class="sep">/</span>
@@ -364,7 +369,7 @@
       </div>
     </div>
   </div>
-  <footer class="site-footer"><div class="footer-copy">SATLab · 2025–2026</div><div class="footer-note">Not affiliated with College Board</div></footer>
+  <footer class="site-footer"><div class="footer-copy"><img class="wm on-light" src="brand/satlab-wordmark.svg" alt="SATLab" width="54" height="17" /><img class="wm on-dark" src="brand/satlab-wordmark-white.svg" alt="SATLab" width="54" height="17" /><span>2025–2026</span></div><div class="footer-note">Not affiliated with College Board</div></footer>
 </div>
 
 <script src="recyclebank.js"></script>

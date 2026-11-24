@@ -13,6 +13,10 @@
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Previous Scores — SATLab</title>
+  <link rel="icon" type="image/svg+xml" href="brand/satlab-icon.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="brand/favicon-32.png" />
+  <link rel="apple-touch-icon" href="brand/apple-touch-icon.png" />
+  <meta name="theme-color" content="#0B1020" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet" />
   <style>
@@ -132,8 +136,8 @@
     #sync-status a { color: var(--gold); text-decoration: underline; text-underline-offset: 2px; }
     :root[data-theme="dark"] #sync-status a { color: var(--gold-2); }
   </style>
-  <link rel="stylesheet" href="theme.css?v=6" />
-  <script src="sidebar.js?v=9"></script>
+  <link rel="stylesheet" href="theme.css?v=7" />
+  <script src="sidebar.js?v=10"></script>
   <script src="kbd.js"></script>
 </head>
 <body>
@@ -141,7 +145,7 @@
 <!-- LIST -->
 <div id="list-page" class="page active">
   <header class="site-header">
-    <div class="logo" onclick="window.location.href='index.html'">SATLab</div>
+    <div class="logo" onclick="window.location.href='index.html'"><img class="mark on-dark" src="brand/satlab-icon-white.svg" alt="" width="36" height="36" /><img class="wm on-light" src="brand/satlab-wordmark.svg" alt="SATLab" width="70" height="22" /><img class="wm on-dark" src="brand/satlab-wordmark-white.svg" alt="SATLab" width="70" height="22" /></div>
     <div class="hdr-right">
       <div class="breadcrumb"><span class="crumb" onclick="window.location.href='index.html'">Home</span><span class="sep">/</span><span class="cur">Previous Scores</span></div>
       <button class="back-btn is-back" onclick="window.location.href='index.html'">Back</button>
@@ -165,13 +169,13 @@
       <div>Finish a module, drill, or full-length test and it'll show up here.</div>
     </div>
   </div>
-  <footer class="site-footer"><div class="footer-copy">SATLab · 2025–2026</div><div class="footer-note">Not affiliated with College Board</div></footer>
+  <footer class="site-footer"><div class="footer-copy"><img class="wm on-light" src="brand/satlab-wordmark.svg" alt="SATLab" width="54" height="17" /><img class="wm on-dark" src="brand/satlab-wordmark-white.svg" alt="SATLab" width="54" height="17" /><span>2025–2026</span></div><div class="footer-note">Not affiliated with College Board</div></footer>
 </div>
 
 <!-- DETAIL — module/drill style (matches in-test results screen) -->
 <div id="detail-page" class="page">
   <header class="site-header">
-    <div class="logo" onclick="window.location.href='index.html'">SATLab</div>
+    <div class="logo" onclick="window.location.href='index.html'"><img class="mark on-dark" src="brand/satlab-icon-white.svg" alt="" width="36" height="36" /><img class="wm on-light" src="brand/satlab-wordmark.svg" alt="SATLab" width="70" height="22" /><img class="wm on-dark" src="brand/satlab-wordmark-white.svg" alt="SATLab" width="70" height="22" /></div>
     <div class="hdr-right">
       <div class="breadcrumb">
         <span class="crumb" onclick="window.location.href='index.html'">Home</span><span class="sep">/</span>
@@ -229,7 +233,7 @@
     </div>
   </div>
 
-  <footer class="site-footer"><div class="footer-copy">SATLab · 2025–2026</div><div class="footer-note">Not affiliated with College Board</div></footer>
+  <footer class="site-footer"><div class="footer-copy"><img class="wm on-light" src="brand/satlab-wordmark.svg" alt="SATLab" width="54" height="17" /><img class="wm on-dark" src="brand/satlab-wordmark-white.svg" alt="SATLab" width="54" height="17" /><span>2025–2026</span></div><div class="footer-note">Not affiliated with College Board</div></footer>
 </div>
 
 <script src="auth.js"></script>
@@ -363,23 +367,31 @@
     list.innerHTML = history.map(r => {
       const scoreLabel = r.type === 'fulltest' ? escH(r.fulltest.total) : `${escH(r.correct)}/${escH(r.total)}`;
       const pctLabel = r.type === 'fulltest' ? `RW ${escH(r.fulltest.rw)} · Math ${escH(r.fulltest.math)}` : `${escH(r.pct)}% correct`;
+      const band = bandOf(r.type === 'fulltest' ? Number(r.fulltest.total) / 16 : Number(r.pct));
       return `<div class="hist-row">
         <input type="checkbox" class="hist-check" data-id="${escH(r.id)}" onchange="updateDeleteBtn()" />
         <div class="hist-main" data-id="${escH(r.id)}" onclick="openDetail(this.dataset.id)">
           <div class="hist-top">
-            <span class="hist-type">${escH(r.typeLabel)}</span>
+            <span class="hist-type" data-cat="${catOf(r)}">${escH(r.typeLabel)}</span>
             <span class="hist-title">${escH(r.title)}</span>
           </div>
           <span class="hist-date">${fmtDate(r.date)}</span>
         </div>
         <div class="hist-right" data-id="${escH(r.id)}" onclick="openDetail(this.dataset.id)" style="cursor:pointer">
-          <div class="hist-score"><div class="hist-score-num">${scoreLabel}</div><div class="hist-score-pct">${pctLabel}</div></div>
+          <div class="hist-score"${band ? ` data-band="${band}"` : ''}><div class="hist-score-num">${scoreLabel}</div><div class="hist-score-pct">${pctLabel}</div></div>
           <div class="hist-arrow" aria-hidden="true"></div>
         </div>
       </div>`;
     }).join('');
     document.getElementById('select-all').checked = false;
     updateDeleteBtn();
+  }
+
+  // Score band (same cut-offs as the Weakness Profile) and subject category, for colour.
+  function bandOf(pct) { return isFinite(pct) ? (pct < 60 ? 'weak' : pct < 80 ? 'mid' : 'strong') : ''; }
+  function catOf(r) {
+    const t = String(r.typeLabel || '');
+    return t === 'Math' ? 'math' : (t === 'English' || t === 'Topical Drill') ? 'rw' : 'full';
   }
 
   function escH(s) {
@@ -478,7 +490,7 @@
   function breakdownRows(arr) {
     return (arr||[]).map(d => `<div class="dom-row">
       <div class="dom-name">${escH(d.name)}</div>
-      <div class="bar-wrap"><div class="bar-fill" style="width:${Number(d.pct) || 0}%"></div></div>
+      <div class="bar-wrap"><div class="bar-fill ${bandOf(Number(d.pct))}" style="width:${Number(d.pct) || 0}%"></div></div>
       <div class="dom-sc">${escH(d.correct)}/${escH(d.total)}</div>
     </div>`).join('');
   }
