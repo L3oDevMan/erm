@@ -15,8 +15,8 @@
 :root:where(:not(:has(body.exam))) {
   /* SATLab brand: navy ink and the blue of the A's dot and the flask's liquid */
   --brand-navy:#0B1020; --brand-blue:#0A5FE0;
-  --ground:#F4F7FC; --paper:#ffffff; --ink:#0B1020; --ink-2:#2E3548; --muted:#545C70; --faint:#8790A5;
-  --line:#DCE3EE; --line-strong:#B3BDCF; --band:#EEF3FB; --rule:#0B1020; --choice:#3A4152;
+  --ground:#F3ECDF; --paper:#FBF7EF; --ink:#0B1020; --ink-2:#2E3548; --muted:#545C70; --faint:#8790A5;
+  --line:#E2D7C4; --line-strong:#C6B89F; --band:#EEE6D6; --rule:#0B1020; --choice:#3A4152;
   --accent:#0A5FE0; --accent-hover:#0849B0; --accent-soft:#E6EFFD; --accent-ink:#0849B0; --on-accent:#ffffff;
   /* the shell: sidebar on desktop, header on phones */
   --shell:#0B1020; --shell-2:#161D33; --shell-line:#232B45; --shell-line-strong:#3A4466; --shell-text:#C8D0E2; --shell-muted:#8D97B0; --shell-strong:#ffffff;
@@ -66,8 +66,8 @@
 
 /* tester.html (a sample module that is not body.exam) keeps the pre-brand palette, so it looks exactly as before */
 :root:has(.tester-badge) {
-  --ground:#ffffff; --paper:#ffffff; --ink:#1d1d1f; --ink-2:#3a3d44; --muted:#5b5f66; --faint:#8b9099;
-  --line:#dcdee3; --line-strong:#b8bcc4; --band:#f5f6f8; --rule:#2b2b2b; --choice:#4a4a4a;
+  --ground:#FAF6EE; --paper:#FDFAF4; --ink:#1d1d1f; --ink-2:#3a3d44; --muted:#5b5f66; --faint:#8b9099;
+  --line:#DDD3C2; --line-strong:#BFB29C; --band:#F1EBDF; --rule:#2b2b2b; --choice:#4a4a4a;
   --accent:#3046c5; --accent-hover:#23379f; --accent-soft:#eceffc; --on-accent:#ffffff;
   --ok:#17803d; --ok-soft:#e8f5ec; --bad:#c0392b; --bad-soft:#fcefed; --warn:#a2640a;
   --shadow-sm:0 1px 2px rgba(20,22,28,.06);
@@ -378,8 +378,8 @@ body:not(.exam) .rq-ctx, body:not(.exam) .rq-count { font-family:var(--font-ui);
    ═══════════════════════════════════════════════════════════ */
 :root:where(:has(body.exam)){
   --black:#0b1f44; --gray-dark:#344054; --gray-mid:#667085; --gray-light:#b4bccb;
-  --gray-border:#e3e8f0; --gray-bg:#edf1f7; --white:#f2f6fc;
-  --card:#ffffff;
+  --gray-border:#E5DCCB; --gray-bg:#EFE8DA; --white:#F7F2E8;
+  --card:#FCF9F3;
   --correct:#1f8a4c; --incorrect:#d1493b; --warn:#b9862b;
   --answer-hover:#eef3fa; --answer-selected:#101828; --answer-selected-text:#ffffff;
   --gold:#1c5fd4; --gold-2:#6f9cf0; --gold-deep:#154aa8;
