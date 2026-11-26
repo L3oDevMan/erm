@@ -179,7 +179,7 @@
       .ref-grid { grid-template-columns: 1fr; }
     }
   </style>
-  <link rel="stylesheet" href="theme.css?v=8" />
+  <link rel="stylesheet" href="theme.css?v=9" />
   <link rel="stylesheet" href="exam.css?v=2" />
   <script src="math_render.js"></script>
 </head>
@@ -406,6 +406,7 @@
 <script src="math_text.js"></script>
 <script src="math_explain.js"></script>
 <script src="hardbank.js"></script>
+<script src="mathdrills.js"></script>
 <script src="exam.js?v=1"></script>
 <script>
 const P = new URLSearchParams(location.search);
@@ -414,10 +415,14 @@ const testLabel = P.get('label')  || 'Practice Test 1';
 const modId     = P.get('module') || '1A';
 // Hard Question Bank sets (test=hard) are built from every Hard question in math_modules.js.
 const HARD_MODE = testId === 'hard';
-const modWord   = HARD_MODE ? 'Set' : 'Module';
+// Math Topical Drills (test=drill&topic=<skill slug>) are built from math_modules.js by mathdrills.js.
+const DRILL_MODE = testId === 'drill';
+const drillTopic = DRILL_MODE ? (P.get('topic') || '') : '';
+const modWord   = (HARD_MODE || DRILL_MODE) ? 'Set' : 'Module';
 const modKey    = `${testId}_${modId}`;
 // Header title, e.g. "Section 2, Module 1: Math" (practice modules are named 1A/1B/2A/2B).
 const sectionTitle = HARD_MODE ? `Math: Hard Set ${modId}`
+  : DRILL_MODE ? `Math Drill: Set ${modId}`
   : /^[12]/.test(modId) ? `Section 2, Module ${modId[0]}: Math` : 'Section 2: Math';
 const contextLabel = `Math · ${testLabel} · ${modWord} ${modId}`; // the Report form's context and the title's tooltip
 window.SATReportContext = () => ({ module: contextLabel });
@@ -441,7 +446,9 @@ window.addEventListener('load', () => {
     document.getElementById('load-lbl').textContent = 'Error: math_modules.js is missing.';
     return;
   }
-  QS = (HARD_MODE && window.HardBank) ? HardBank.mathSet(parseInt(modId, 10), P.get('skill') || '') : MATH_MODULES[modKey];
+  QS = (HARD_MODE && window.HardBank) ? HardBank.mathSet(parseInt(modId, 10), P.get('skill') || '')
+    : DRILL_MODE ? (window.MathDrills ? MathDrills.set(drillTopic, parseInt(modId, 10)) : [])
+    : MATH_MODULES[modKey];
   if (!QS || !QS.length) {
     document.getElementById('load-lbl').textContent = `No questions for: ${modKey}`;
     return;
@@ -461,7 +468,7 @@ window.addEventListener('load', () => {
   checked    = new Array(QS.length).fill(false);
   eliminated = QS.map(() => new Set());
   // Hard sets vary in size: keep the real pace of 35 minutes per 22 questions.
-  if (HARD_MODE) timerSecs = Math.max(60, Math.round(QS.length * 35 * 60 / 22));
+  if (HARD_MODE || DRILL_MODE) timerSecs = Math.max(60, Math.round(QS.length * 35 * 60 / 22));
   const titleEl = document.getElementById('ex-title');
   titleEl.textContent = sectionTitle; titleEl.title = contextLabel;
   document.getElementById('ex-navpop-title').textContent = `${sectionTitle} Questions`;
