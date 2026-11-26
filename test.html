@@ -215,6 +215,7 @@ if (new URLSearchParams(location.search).get('test') === 'hard') document.write(
 <script src="hardbank.js"></script>
 <script src="recyclebank.js"></script>
 <script src="rworder.js"></script>
+<script src="rwfixes.js?v=1"></script>
 <script src="exam.js?v=1"></script>
 <script src="coach.js?v=1"></script>
 <script>
@@ -288,6 +289,7 @@ async function initTest() {
     return;
   }
 
+  if (rawQuestions && window.RWFix) rawQuestions.forEach(RWFix.apply); // repairs (missing choice D, lost apostrophes)
   if (!rawQuestions || rawQuestions.length === 0) {
     document.getElementById('loading-screen').innerHTML =
       `<div class="loading-error">No questions found for ${escHtml(HARD_MODE ? 'hard set ' + moduleId + (hardSkill ? ' (' + hardSkill + ')' : '') : RECYCLE_MODE ? 'recycles set ' + moduleId : 'module: ' + moduleKey)}</div>`; // escaped: these come from the URL
