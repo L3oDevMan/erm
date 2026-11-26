@@ -211,7 +211,8 @@
   </div>
 </div>
 
-<script src="rwfixes.js?v=1"></script>
+<script src="rwfixes.js?v=2"></script>
+<script>(function(){ var p = new URLSearchParams(location.search); RWFix.load((p.get('topic') || 'words-in-context') + '_' + (p.get('module') || '1')); })();</script>
 <script src="exam.js?v=1"></script>
 <script src="coach.js?v=1"></script>
 <script>
@@ -266,6 +267,7 @@ async function initTest() {
     return;
   }
 
+  if (rawQuestions && window.RWFix) RWFix.overlay(rawQuestions, moduleKey); // the site's repaired text (rw/)
   if (rawQuestions && window.RWFix) rawQuestions.forEach(RWFix.apply); // repairs (missing choice D, lost apostrophes)
   if (!rawQuestions || rawQuestions.length === 0) {
     document.getElementById('loading-screen').innerHTML =

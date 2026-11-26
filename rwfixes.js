@@ -34,7 +34,23 @@
     try { Object.defineProperty(q, '__rwfixed', { value: true }); } catch (e) {}
     return q;
   }
-  var api = { apply: apply, fixText: fixText, choiceD: CHOICE_D };
+  // The question server's copy of a module is older than the site's (tables, underlines); rw/<key>.js holds the
+  // repaired text. load(key) writes its script tag (call while the page is still loading); overlay() lays it on.
+  var FIELDS = ['domain', 'skill', 'difficulty', 'context', 'passage', 'passage_lines', 'question', 'choices', 'underline', 'underline_segments'];
+  function load(key) {
+    if (typeof document === 'undefined' || !/^[a-z0-9-]+_[0-9A-Za-z]+$/.test(key || '')) return;
+    document.write('<script src="rw/' + key + '.js?v=1"><\/script>');
+  }
+  function overlay(qs, key) {
+    var local = (typeof window !== 'undefined' && window.RW_DISPLAY && window.RW_DISPLAY[key]) || [];
+    var byId = {}; local.forEach(function (q) { byId[q.id] = q; });
+    (qs || []).forEach(function (q) {
+      var l = q && byId[q.id]; if (!l) return;
+      FIELDS.forEach(function (f) { if (l[f] !== undefined) q[f] = JSON.parse(JSON.stringify(l[f])); });
+    });
+    return qs;
+  }
+  var api = { apply: apply, fixText: fixText, choiceD: CHOICE_D, load: load, overlay: overlay };
   if (typeof window !== 'undefined') window.RWFix = api;
   if (typeof module !== 'undefined') module.exports = api;
 })();
