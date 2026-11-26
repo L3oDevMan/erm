@@ -628,6 +628,7 @@
 <script src="math_modules.js"></script>
 <script src="math_text.js"></script>
 <script src="math_explain.js"></script>
+<script src="rworder.js"></script>
 <script src="exam.js?v=1"></script>
 <script>
 // ══════════════════════════════════════════════════════════════
@@ -802,7 +803,8 @@ function buildEnglishModule(rng, excludeIds, mix) {
     if (match) grouped[match].push(q);
   });
   // Adaptive modules run easy → hard within each domain, like the real test.
-  return DOMAIN_ORDER.flatMap(d => mix ? grouped[d].slice().sort(byDifficulty) : grouped[d]);
+  // Then by question type in the team's order (rworder.js); adaptive modules run easy → hard within each type.
+  return RWOrder.sort(DOMAIN_ORDER.flatMap(d => grouped[d]), { byDifficulty: mix });
 }
 
 // ── Build random Math module (22 questions: 17 MC + 5 FR, domain-balanced) ──

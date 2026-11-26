@@ -214,6 +214,7 @@ if (new URLSearchParams(location.search).get('test') === 'hard') document.write(
 </script>
 <script src="hardbank.js"></script>
 <script src="recyclebank.js"></script>
+<script src="rworder.js"></script>
 <script src="exam.js?v=1"></script>
 <script src="coach.js?v=1"></script>
 <script>
@@ -302,7 +303,8 @@ async function initTest() {
     if (match) _grouped[match].push(q);
   });
   // Recycles sets keep their own order (most repeated first, or the team doc's order for set 2); everything else runs in domain order.
-  QUESTIONS = RECYCLE_MODE ? rawQuestions.slice() : DOMAIN_ORDER.flatMap(d => _grouped[d]);
+  // …and within that, by question type in the team's order (Words in Context first, …): rworder.js.
+  QUESTIONS = RECYCLE_MODE ? rawQuestions.slice() : RWOrder.sort(DOMAIN_ORDER.flatMap(d => _grouped[d]));
 
   const totalQ = QUESTIONS.length;
   answers = new Array(totalQ).fill(null);
